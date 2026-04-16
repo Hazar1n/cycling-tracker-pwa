@@ -189,8 +189,19 @@ button{
 
 </div>
 
+<button onclick="resetProgress()" style="background:#ef4444;">
+  🔄 Reset план
+</button>
 
 <script>
+
+function resetProgress(){
+  localStorage.clear();
+  currentWeek = 0;
+  renderWeeks();
+  updateProgress();
+}
+
 
 // 🔐 SIGN UP
 async function signUp(){
@@ -314,6 +325,8 @@ const weeks = [
   }
 ];
 
+let currentWeek = Number(localStorage.getItem('currentWeek') || 0);
+
 // 📅 RENDER WEEKS
 const weeksEl = document.getElementById('weeks');
 
@@ -323,31 +336,57 @@ function renderWeeks(){
 
   weeksEl.innerHTML = '';
 
-  weeks.forEach((week, wi) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<h3>${week.title}</h3>`;
+  const week = weeks[currentWeek];
 
-    week.days.forEach((day, di) => {
-      const key = `${wi}-${di}`;
-      const checked = localStorage.getItem(key) === '1';
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<h3>${week.title}</h3>`;
 
-      const row = document.createElement('label');
-      row.className = 'day';
+  week.days.forEach((day, di) => {
+    const key = `${currentWeek}-${di}`;
+    const checked = localStorage.getItem(key) === '1';
 
-      row.innerHTML = `
-        <input type="checkbox" ${checked ? 'checked' : ''} 
-        onchange="saveCheck('${key}', this.checked)">
-        <span>${day}</span>
-      `;
+    const row = document.createElement('label');
+    row.className = 'day';
 
-      card.appendChild(row);
-    });
+    row.innerHTML = `
+      <input type="checkbox" ${checked ? 'checked' : ''} 
+      onchange="saveCheck('${key}', this.checked)">
+      <span>${day}</span>
+    `;
 
-    weeksEl.appendChild(card);
+    card.appendChild(row);
   });
 
-  updateProgress();
+  weeksEl.appendChild(card);
+
+  checkWeekCompletion();
+}
+
+function checkWeekCompletion(){
+  const week = weeks[currentWeek];
+
+  let allDone = true;
+
+  week.days.forEach((day, di) => {
+    const key = `${currentWeek}-${di}`;
+    if(localStorage.getItem(key) !== '1'){
+      allDone = false;
+    }
+  });
+
+  if(allDone){
+    if(currentWeek < weeks.length - 1){
+      currentWeek++;
+      localStorage.setItem('currentWeek', currentWeek);
+
+      alert("🎉 Минаваш към следващата седмица!");
+
+      renderWeeks();
+    } else {
+      alert("🏆 Завърши целия план!");
+    }
+  }
 }
 
 
@@ -501,8 +540,10 @@ function updateProgress(){
 }
 
 function saveCheck(key,val){
-  localStorage.setItem(key,val?'1':'0');
+  localStorage.setItem(key, val ? '1' : '0');
+
   updateProgress();
+  checkWeekCompletion(); // 🔥 важно
 }
 
 checkUser();
