@@ -8,7 +8,7 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#f97316">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -120,10 +120,11 @@ button{
 <script>
 
 // 🔥 SUPABASE
-const supabaseClient = supabase.createClient(
+const supabaseClient = window.supabase.createClient(
 'https://kudsnoxcgisxzzltlfwr.supabase.co',
 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1ZHNub3hjZ2lzeHp6bHRsZndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjIyNDIsImV4cCI6MjA5MTkzODI0Mn0.4hUFvZJAnObCQRVHijsoMWdpXbnZt0oiKC2bZ_n9Idw'
 );
+console.log("SUPABASE:", supabaseClient);
 
 // 🚴 ПОДРОБЕН ПЛАН
 const weeks = [
