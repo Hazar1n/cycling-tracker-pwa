@@ -5,55 +5,86 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Cycling Tracker Pro</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#f97316">
 <style>
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0f172a;
+  font-family: Inter, Arial, sans-serif;
+  background: linear-gradient(180deg, #0f172a, #111827);
   color: #fff;
   max-width: 430px;
   margin-inline: auto;
   padding: 16px;
 }
+
 .hero, .card {
-  background: #111827;
-  border-radius: 22px;
-  padding: 16px;
+  background: rgba(17, 24, 39, 0.95);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 24px;
+  padding: 18px;
   margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
+
 .day {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-start;
   background: #1f2937;
-  border-radius: 16px;
-  padding: 12px;
+  border-radius: 18px;
+  padding: 14px;
   margin: 10px 0;
+  transition: 0.2s ease;
 }
+
+.day:hover {
+  transform: scale(1.01);
+}
+
 .bar {
-  height: 10px;
+  height: 12px;
   background: #334155;
   border-radius: 999px;
   overflow: hidden;
+  margin-top: 8px;
 }
+
 .fill {
   height: 100%;
-  background: #f97316;
+  background: linear-gradient(90deg, #f97316, #fb923c);
+  transition: width 0.3s ease;
 }
+
 input[type='number'] {
   width: 100%;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: 16px;
   border: none;
   background: #1f2937;
   color: white;
+  font-size: 16px;
 }
+
 .small {
   color: #94a3b8;
   font-size: 13px;
 }
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.stat-box {
+  background: #1f2937;
+  border-radius: 18px;
+  padding: 14px;
+}
+
 h2, h3 { margin: 0 0 8px; }
 </style>
 </head>
@@ -61,9 +92,20 @@ h2, h3 { margin: 0 0 8px; }
 
 <div class="hero">
   <h2>🚴 Cycling Tracker Pro</h2>
-  <div class="small">Fat loss • 4 седмици • PWA ready</div>
+  <div class="small">Fat loss • 4 седмици • Premium PWA</div>
   <div style="margin-top:10px">Общ прогрес: <span id="progressText">0%</span></div>
   <div class="bar"><div class="fill" id="progressBar" style="width:0%"></div></div>
+
+  <div class="stats">
+    <div class="stat-box">
+      <div class="small">🔥 Calories</div>
+      <div id="calories" style="font-size:22px;font-weight:700;">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="small">🏆 Streak</div>
+      <div id="streak" style="font-size:22px;font-weight:700;">0 days</div>
+    </div>
+  </div>
 </div>
 
 <div id="weeks"></div>
@@ -151,6 +193,12 @@ weeks.forEach((week, wi) => {
   weeksEl.appendChild(card);
 });
 
+function updateStats(done) {
+  const calories = done * 450;
+  document.getElementById('calories').textContent = calories;
+  document.getElementById('streak').textContent = done + ' days';
+}
+
 function saveCheck(key, value) {
   localStorage.setItem(key, value ? '1' : '0');
   updateProgress();
@@ -162,9 +210,13 @@ function updateProgress() {
     const k = localStorage.key(i);
     if (k.includes('-') && localStorage.getItem(k) === '1') done++;
   }
+
   const pct = Math.round((done / total) * 100) || 0;
+
   document.getElementById('progressText').textContent = pct + '%';
   document.getElementById('progressBar').style.width = pct + '%';
+
+  updateStats(done);
 }
 
 const weightInput = document.getElementById('weight');
