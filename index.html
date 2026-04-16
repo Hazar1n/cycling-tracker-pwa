@@ -266,39 +266,31 @@ async function renderLogs(){
   const weightEl = document.getElementById('latestWeight');
   const summaryEl = document.getElementById('summary');
 
-  // ❗ ако няма данни
   if(!logs || logs.length === 0){
     historyEl.innerHTML = "Няма данни още";
-    caloriesEl.textContent = "0";
-    weightEl.textContent = "-";
-    summaryEl.innerHTML = "";
     return;
   }
 
-  // 🔥 общи калории
+  // 👉 ТУК е правилното място
+  renderChart(logs);
+
   const totalCalories = logs.reduce((sum, l) => sum + Number(l.calories || 0), 0);
 
-  // ⚖️ тегло
   const firstWeight = Number(logs[0].weight);
   const lastWeight = Number(logs[logs.length - 1].weight);
-  const diff = (lastWeight - firstWeight).toFixed(1);
 
-  // 📊 показване
   caloriesEl.textContent = totalCalories;
   weightEl.textContent = lastWeight + " кг";
 
-  // 📚 история
   historyEl.innerHTML = logs.map(l => `
     <div class="log-item">
       📅 ${l.date} • 🔥 ${l.calories} kcal • ⚖️ ${l.weight} кг
     </div>
   `).reverse().join('');
 
-  // 📈 summary
   summaryEl.innerHTML = `
     <div class="log-item">🔥 Общо калории: ${totalCalories}</div>
-    <div class="log-item">⚖️ Промяна: ${diff} кг</div>
-    <div class="log-item">📅 Тренировки: ${logs.length}</div>
+    <div class="log-item">⚖️ Разлика: ${(lastWeight-firstWeight).toFixed(1)} кг</div>
   `;
 }
 
@@ -369,7 +361,6 @@ function saveCheck(key,val){
 
 updateProgress();
 renderLogs();
-renderChart(logs);
 
 </script>
 
