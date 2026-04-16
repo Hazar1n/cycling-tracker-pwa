@@ -97,6 +97,8 @@ button{
   <button onclick="logout()">Изход</button>
 </div>
 
+<div id="app" style="display:none">
+
 <div class="card">
 <h2>🚴 Cycling Tracker</h2>
 <div>Прогрес: <span id="progressText">0%</span></div>
@@ -107,8 +109,6 @@ button{
 ⚖️ Тегло: <span id="latestWeight">-</span>
 </div>
 </div>
-
-<div id="weeks"></div>
 
 <div class="card">
 <h3>Добави тренировка</h3>
@@ -130,6 +130,7 @@ button{
 <div class="card">
   <h3>📈 Графика на теглото</h3>
   <canvas id="weightChart"></canvas>
+</div>
 </div>
 
 <script>
@@ -156,7 +157,7 @@ async function login(){
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email,
     password
   });
@@ -165,7 +166,24 @@ async function login(){
     alert(error.message);
   } else {
     alert("Влязъл си ✅");
+    checkUser(); // 🔥 важно
+  }
+}
+
+// 👤 CHECK USER
+async function checkUser(){
+  const { data } = await supabaseClient.auth.getUser();
+
+  const user = data.user;
+
+  if(user){
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('auth').style.display = 'none';
+
     renderLogs();
+  } else {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('auth').style.display = 'block';
   }
 }
 
@@ -423,6 +441,7 @@ function saveCheck(key,val){
   updateProgress();
 }
 
+checkUser();
 updateProgress();
 renderLogs();
 
