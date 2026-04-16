@@ -37,21 +37,7 @@ body{
   padding:14px;
   margin:10px 0
 }
-.day input{
-  margin-top:4px;
-  transform:scale(1.15);
-}
-.day span{
-  flex:1;
-  text-align:left;
-  font-size:14px;
-}
-.bar{height:12px;background:#334155;border-radius:999px;overflow:hidden;margin-top:8px}
-.fill{height:100%;background:linear-gradient(90deg,#f97316,#fb923c);transition:width .3s ease}
-.small{color:#94a3b8;font-size:13px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-.stat-box{background:#1f2937;border-radius:18px;padding:14px}
-input{
+.day input[type='number']{
   width:100%;
   padding:14px;
   border-radius:14px;
@@ -60,6 +46,13 @@ input{
   color:#fff;
   margin-top:8px;
   font-size:16px;
+}
+.day input[type='checkbox']{
+  width:18px;
+  min-width:18px;
+  height:18px;
+  margin-top:4px;
+  flex:none;
 }
 button{
   width:100%;
