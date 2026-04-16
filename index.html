@@ -3,223 +3,281 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Cycling Tracker Pro V3</title>
+<title>Cycling Tracker Pro</title>
+
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#f97316">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
 *{box-sizing:border-box}
+
 body{
   margin:0;
-  font-family:'Inter',Arial,sans-serif;
+  font-family:'Inter',sans-serif;
   background:linear-gradient(180deg,#0f172a,#111827);
   color:#fff;
   max-width:430px;
-  margin-inline:auto;
+  margin:auto;
   padding:16px;
-  line-height:1.55;
-  letter-spacing:0.1px;
 }
+
 .hero,.card{
-  background:rgba(17,24,39,.95);
-  border:1px solid rgba(255,255,255,.06);
+  background:#111827;
   border-radius:24px;
   padding:18px;
   margin-bottom:16px;
-  box-shadow:0 8px 24px rgba(0,0,0,.25)
 }
+
 .day{
   display:flex;
-  gap:12px;
-  align-items:flex-start;
+  gap:10px;
   background:#1f2937;
-  border-radius:18px;
-  padding:14px;
-  margin:10px 0
+  border-radius:16px;
+  padding:12px;
+  margin:8px 0;
 }
-.day input[type='number']{
+
+.day input[type="checkbox"]{
+  width:18px;
+  height:18px;
+}
+
+.bar{
+  height:10px;
+  background:#334155;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.fill{
+  height:100%;
+  background:#f97316;
+}
+
+input{
   width:100%;
-  padding:14px;
-  border-radius:14px;
+  padding:12px;
   border:none;
+  border-radius:12px;
+  margin-top:8px;
   background:#1f2937;
   color:#fff;
-  margin-top:8px;
-  font-size:16px;
 }
-.day input[type='checkbox']{
-  width:18px;
-  min-width:18px;
-  height:18px;
-  margin-top:4px;
-  flex:none;
-}
+
 button{
   width:100%;
-  padding:14px;
+  padding:12px;
   border:none;
-  border-radius:14px;
+  border-radius:12px;
   background:#f97316;
-  color:#fff;
-  font-weight:800;
-  margin-top:12px;
-  font-family:'Inter',Arial,sans-serif;
+  color:white;
+  margin-top:10px;
+  font-weight:bold;
 }
+
 .log-item{
   background:#1f2937;
-  border-radius:14px;
-  padding:12px;
+  padding:10px;
+  border-radius:12px;
   margin-top:8px;
-  font-size:14px;
-  line-height:1.5;
-}
-h2,h3{
-  margin:0 0 8px;
-  font-weight:800;
-  letter-spacing:-0.2px;
 }
 </style>
 </head>
+
 <body>
+
 <div class="hero">
-  <h2>🚴 Cycling Tracker Pro</h2>
-  <div class="small">V3 • Fat loss • Full progress logging</div>
-  <div style="margin-top:10px">Общ прогрес: <span id="progressText">0%</span></div>
-  <div class="bar"><div class="fill" id="progressBar" style="width:0%"></div></div>
-  <div class="stats">
-    <div class="stat-box"><div class="small">🔥 Общо калории</div><div id="totalCalories" style="font-size:22px;font-weight:700">0</div></div>
-    <div class="stat-box"><div class="small">⚖️ Последно тегло</div><div id="latestWeight" style="font-size:22px;font-weight:700">-</div></div>
+  <h2>🚴 Cycling Tracker</h2>
+  <div>Прогрес: <span id="progressText">0%</span></div>
+  <div class="bar"><div id="progressBar" class="fill"></div></div>
+
+  <div style="margin-top:10px;">
+    🔥 Калории: <span id="totalCalories">0</span><br>
+    ⚖️ Тегло: <span id="latestWeight">-</span>
   </div>
 </div>
 
 <div id="weeks"></div>
 
 <div class="card">
-  <h3>📝 Запис след тренировка</h3>
-  <div class="small">Въведи калории и тегло след всяко каране</div>
-  <input id="caloriesInput" type="number" placeholder="Изгорени калории" />
-  <input id="weightInput" type="number" placeholder="Тегло след тренировка (кг)" />
-  <button onclick="saveWorkoutLog()">Запази тренировка</button>
+  <h3>Добави тренировка</h3>
+  <input id="caloriesInput" type="number" placeholder="Калории">
+  <input id="weightInput" type="number" placeholder="Тегло">
+  <button onclick="saveWorkoutLog()">Запази</button>
 </div>
 
 <div class="card">
-  <h3>📈 Прогрес след 4 седмици</h3>
-  <div id="summary"></div>
-</div>
-
-<div class="card">
-  <h3>📚 История</h3>
+  <h3>История</h3>
   <div id="history"></div>
 </div>
 
 <script>
-const weeks=[
-{title:'Седмица 1',days:[
-'Понеделник • Почивка • раздвижване + стречинг + разтягане 10–15 мин',
-'Вторник • 30 км • Zone 2 • 150–160 W • steady fat burn',
-'Сряда • 25 км • Загрявка 7 км @ 140–150 W • 4x3 мин @ 190–200 W • 3 мин леко @ 100–120 W между всяка серия • разпускане леко до общите км до 25 км',
-'Четвъртък • 15 км • Recovery • 110–130 W • много леко въртене',
-'Петък • 25 км • Tempo • 170–180 W • контролирано темпо',
-'Събота • 40 км • Long Ride • Zone 2 • 150–160 W • fat loss endurance',
-'Неделя • Почивка • walk 30 мин'
-]},
-{title:'Седмица 2',days:[
-'Понеделник • Почивка • раздвижване + стречинг',
-'Вторник • 35 км • Zone 2 • 150–160 W',
-'Сряда • 30 км • Загрявка 8 км • 5x3 мин @ 195–205 W • 3 мин леко @ 100–120 W между сериите • разпускане леко до общите км до 30 км',
-'Четвъртък • 15 км • Recovery • 120 W',
-'Петък • 30 км • Tempo • 170–180 W',
-'Събота • 45 км • Long Ride • 150–160 W',
-'Неделя • Почивка • леко ходене'
-]},
-{title:'Седмица 3',days:[
-'Понеделник • Почивка • раздвижване + стречинг',
-'Вторник • 35 км • Zone 2 • 155–160 W',
-'Сряда • 30 км • Загрявка 8 км • 4x4 мин @ 195–205 W • 4 мин леко @ 100–120 W • разпускане леко до общите км',
-'Четвъртък • 20 км • Recovery • 110–125 W',
-'Петък • 30 км • Tempo • 175–185 W',
-'Събота • 50 км • Long Ride • Zone 2 • 150–160 W',
-'Неделя • Почивка • walk + stretch'
-]},
-{title:'Седмица 4',days:[
-'Понеделник • Почивка • recovery day',
-'Вторник • 25 км • Easy Zone 2 • 150–155 W',
-'Сряда • 20 км • Загрявка 5 км • 3x3 мин @ 190 W • 3 мин леко @ 100–120 W • разпускане леко до общите км',
-'Четвъртък • Почивка • раздвижване + стречинг',
-'Петък • 20 км • Easy • 120–130 W',
-'Събота • 35 км • Long Easy • 150 W',
-'Неделя • Пълна почивка'
-]}
+
+// 🔥 SUPABASE
+const supabaseClient = supabase.createClient(
+  'https://kudsnoxcgisxzzltlfwr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1ZHNub3hjZ2lzeHp6bHRsZndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjIyNDIsImV4cCI6MjA5MTkzODI0Mn0.4hUFvZJAnObCQRVHijsoMWdpXbnZt0oiKC2bZ_n9Idw'
+);
+
+// 📅 ТРЕНИРОВКИ
+const weeks = [
+  {
+    title: 'Седмица 1',
+    days: [
+      'Понеделник • Почивка • раздвижване + стречинг 10–15 мин',
+      'Вторник • 30 км • Zone 2 • 150–160 W • равномерно темпо за изгаряне на мазнини',
+      'Сряда • 25 км • Загрявка 7 км @ 140–150 W • 4x3 мин @ 190–200 W • 3 мин леко @ 100–120 W между всяка серия • разпускане леко до общите км (25 км)',
+      'Четвъртък • 15 км • Възстановително каране • 110–130 W • много леко въртене',
+      'Петък • 25 км • Tempo • 170–180 W • стабилно темпо',
+      'Събота • 40 км • Дълго каране • Zone 2 • 150–160 W • издръжливост и fat burn',
+      'Неделя • Почивка • разходка 20–30 мин'
+    ]
+  },
+  {
+    title: 'Седмица 2',
+    days: [
+      'Понеделник • Почивка • раздвижване + стречинг',
+      'Вторник • 35 км • Zone 2 • 150–160 W • steady каране',
+      'Сряда • 30 км • Загрявка 8 км @ 140–150 W • 5x3 мин @ 195–205 W • 3 мин леко @ 100–120 W • разпускане до 30 км',
+      'Четвъртък • 15 км • Възстановително каране • около 120 W',
+      'Петък • 30 км • Tempo • 170–180 W',
+      'Събота • 45 км • Дълго каране • Zone 2 • 150–160 W',
+      'Неделя • Почивка • леко ходене'
+    ]
+  },
+  {
+    title: 'Седмица 3',
+    days: [
+      'Понеделник • Почивка • раздвижване + стречинг',
+      'Вторник • 35 км • Zone 2 • 155–160 W',
+      'Сряда • 30 км • Загрявка 8 км • 4x4 мин @ 195–205 W • 4 мин леко @ 100–120 W • разпускане до общите км',
+      'Четвъртък • 20 км • Възстановително каране • 110–125 W',
+      'Петък • 30 км • Tempo • 175–185 W',
+      'Събота • 50 км • Дълго каране • Zone 2 • 150–160 W',
+      'Неделя • Почивка • walk + стречинг'
+    ]
+  },
+  {
+    title: 'Седмица 4 (разтоварваща)',
+    days: [
+      'Понеделник • Почивка • възстановяване',
+      'Вторник • 25 км • Easy Zone 2 • 150–155 W',
+      'Сряда • 20 км • Загрявка 5 км • 3x3 мин @ 190 W • 3 мин леко @ 100–120 W • разпускане до общите км',
+      'Четвъртък • Почивка • раздвижване + стречинг',
+      'Петък • 20 км • Easy • 120–130 W',
+      'Събота • 35 км • Леко дълго каране • около 150 W',
+      'Неделя • Пълна почивка'
+    ]
+  }
 ];
 
-const weeksEl=document.getElementById('weeks');
-let total=0;
-weeks.forEach((week,wi)=>{
- const card=document.createElement('div');
- card.className='card';
- card.innerHTML=`<h3>${week.title}</h3>`;
- week.days.forEach((day,di)=>{
-  total++;
-  const key=`${wi}-${di}`;
-  const checked=localStorage.getItem(key)==='1';
-  const row=document.createElement('label');
-  row.className='day';
-  row.innerHTML=`<input type="checkbox" ${checked?'checked':''} onchange="saveCheck('${key}',this.checked)"><span>${day}</span>`;
-  card.appendChild(row);
- });
- weeksEl.appendChild(card);
+const weeksEl = document.getElementById('weeks');
+let total = 0;
+
+weeks.forEach((week, wi) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<h3>${week.title}</h3>`;
+
+  week.days.forEach((day, di) => {
+    total++;
+    const key = `${wi}-${di}`;
+    const checked = localStorage.getItem(key) === '1';
+
+    const row = document.createElement('label');
+    row.className = 'day';
+    row.innerHTML = `
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="saveCheck('${key}', this.checked)">
+      <span>${day}</span>
+    `;
+    card.appendChild(row);
+  });
+
+  weeksEl.appendChild(card);
 });
 
-function getLogs(){return JSON.parse(localStorage.getItem('workoutLogs')||'[]')}
-function setLogs(logs){localStorage.setItem('workoutLogs',JSON.stringify(logs))}
-
-function saveWorkoutLog(){
- const calories=Number(document.getElementById('caloriesInput').value||0);
- const weight=Number(document.getElementById('weightInput').value||0);
- if(!calories||!weight)return;
- const logs=getLogs();
- logs.push({date:new Date().toLocaleDateString('bg-BG'),calories,weight});
- setLogs(logs);
- document.getElementById('caloriesInput').value='';
- document.getElementById('weightInput').value='';
- renderLogs();
+// 💾 LOCAL STORAGE
+function getLogs(){
+  return JSON.parse(localStorage.getItem('logs') || '[]');
 }
 
-function saveCheck(key,val){localStorage.setItem(key,val?'1':'0');updateProgress()}
+function setLogs(logs){
+  localStorage.setItem('logs', JSON.stringify(logs));
+}
 
+// 🚀 SAVE WORKOUT
+async function saveWorkoutLog(){
+  const calories = Number(document.getElementById('caloriesInput').value);
+  const weight = Number(document.getElementById('weightInput').value);
+
+  if(!calories || !weight) return;
+
+  const log = {
+    date: new Date().toLocaleDateString('bg-BG'),
+    calories,
+    weight
+  };
+
+  // 🔥 SAVE TO SUPABASE
+  await supabaseClient.from('workouts').insert([log]);
+
+  // 💾 SAVE LOCAL
+  const logs = getLogs();
+  logs.push(log);
+  setLogs(logs);
+
+  renderLogs();
+
+  document.getElementById('caloriesInput').value = '';
+  document.getElementById('weightInput').value = '';
+}
+
+// 📊 PROGRESS
 function updateProgress(){
- let done=0;
- for(let i=0;i<localStorage.length;i++){
-  const k=localStorage.key(i);
-  if(k.includes('-')&&localStorage.getItem(k)==='1')done++;
- }
- const pct=Math.round((done/total)*100)||0;
- document.getElementById('progressText').textContent=pct+'%';
- document.getElementById('progressBar').style.width=pct+'%';
+  let done = 0;
+
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k.includes('-') && localStorage.getItem(k)==='1') done++;
+  }
+
+  const pct = Math.round((done/total)*100)||0;
+
+  document.getElementById('progressText').textContent = pct+'%';
+  document.getElementById('progressBar').style.width = pct+'%';
 }
 
+// 📚 HISTORY
 function renderLogs(){
- const logs=getLogs();
- const totalCalories=logs.reduce((a,l)=>a+l.calories,0);
- const latest=logs[logs.length-1];
- document.getElementById('totalCalories').textContent=totalCalories;
- document.getElementById('latestWeight').textContent=latest?latest.weight+' кг':'-';
- 
- const history=document.getElementById('history');
- history.innerHTML=logs.map(l=>`<div class="log-item">📅 ${l.date} • 🔥 ${l.calories} kcal • ⚖️ ${l.weight} кг</div>`).reverse().join('');
- 
- const first=logs[0];
- const last=logs[logs.length-1];
- const diff=first&&last?(last.weight-first.weight).toFixed(1):0;
- document.getElementById('summary').innerHTML=`
-  <div class="log-item">Общо тренировки: ${logs.length}</div>
-  <div class="log-item">Общо изгорени калории: ${totalCalories}</div>
-  <div class="log-item">Промяна в теглото: ${diff} кг</div>
- `;
+  const logs = getLogs();
+
+  const totalCalories = logs.reduce((a,l)=>a+l.calories,0);
+  const latest = logs[logs.length-1];
+
+  document.getElementById('totalCalories').textContent = totalCalories;
+  document.getElementById('latestWeight').textContent = latest ? latest.weight+' кг' : '-';
+
+  document.getElementById('history').innerHTML =
+    logs.map(l=>`
+      <div class="log-item">
+        📅 ${l.date} • 🔥 ${l.calories} kcal • ⚖️ ${l.weight} кг
+      </div>
+    `).reverse().join('');
+}
+
+function saveCheck(key,val){
+  localStorage.setItem(key,val?'1':'0');
+  updateProgress();
 }
 
 updateProgress();
 renderLogs();
+
 </script>
+
 </body>
 </html>
