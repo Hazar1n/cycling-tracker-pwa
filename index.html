@@ -240,12 +240,25 @@ button{
 
 <script>
 
-function getTodayIndex(){
-  const day = new Date().getDay();
+function getProgramDay(){
+  const today = new Date();
 
-  // 0 = Sunday → правим го последен ден
-  return day === 0 ? 6 : day - 1;
+  const diffTime = today - startDate;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  return diffDays;
 }
+
+function getWeekAndDay(){
+  const dayNumber = getProgramDay();
+
+  const weekIndex = Math.floor(dayNumber / 7);
+  const dayIndex = dayNumber % 7;
+
+  return { weekIndex, dayIndex };
+}
+
+const dayNumber = getProgramDay() + 1;
 
 
 let startX = 0;
@@ -260,6 +273,7 @@ app.addEventListener('touchstart', (e) => {
 app.addEventListener('touchend', (e) => {
   endX = e.changedTouches[0].clientX;
   handleSwipe();
+  renderToday();
 });
 
 function handleSwipe(){
@@ -267,20 +281,20 @@ function handleSwipe(){
 
   // 👉 swipe наляво (следваща седмица)
   if(diff > 50){
-    if(currentWeek < weeks.length - 1){
-      currentWeek++;
-      localStorage.setItem('currentWeek', currentWeek);
-      renderWeeks();
-    }
+  if(currentWeek < weeks.length - 1){
+    currentWeek++;
+    localStorage.setItem('currentWeek', currentWeek);
+    renderWeeks();
+    renderToday(); // 🔥
   }
+}
 
-  // 👉 swipe надясно (предишна)
-  if(diff < -50){
-    if(currentWeek > 0){
-      currentWeek--;
-      localStorage.setItem('currentWeek', currentWeek);
-      renderWeeks();
-    }
+if(diff < -50){
+  if(currentWeek > 0){
+    currentWeek--;
+    localStorage.setItem('currentWeek', currentWeek);
+    renderWeeks();
+    renderToday(); // 🔥
   }
 }
 
@@ -301,7 +315,12 @@ function toggleWeek(){
 function renderToday(){
   const todayEl = document.getElementById('todayContent');
 
-  const dayIndex = getTodayIndex();
+  const { weekIndex, dayIndex } = getWeekAndDay();
+
+  // 🔥 sync currentWeek
+  currentWeek = Math.min(weekIndex, weeks.length - 1);
+  localStorage.setItem('currentWeek', currentWeek);
+
   const week = weeks[currentWeek];
   const day = week.days[dayIndex];
 
@@ -309,13 +328,15 @@ function renderToday(){
   const checked = localStorage.getItem(key) === '1';
 
   todayEl.innerHTML = `
-    <div class="day">
-      <input type="checkbox" ${checked ? 'checked' : ''}
-      onchange="saveCheck('${key}', this.checked)">
-      <span>${day}</span>
-    </div>
-  `;
-}
+  <h3>📅 Ден ${dayNumber}</h3>
+
+  <div class="day">
+    <input type="checkbox" ${checked ? 'checked' : ''}
+    onchange="saveCheck('${key}', this.checked)">
+    <span>${day}</span>
+  </div>
+`;
+
 
 function animateSwipe(direction){
   const el = document.getElementById('weeks');
@@ -327,6 +348,7 @@ function animateSwipe(direction){
   }, 200);
 }
 
+const startDate = new Date(2026, 3, 15); // 15 април (месеците са 0-index!)
 
 function resetProgress(){
   localStorage.clear();
