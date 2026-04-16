@@ -13,44 +13,36 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-*{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:'Inter',sans-serif;
-  background:linear-gradient(180deg,#0f172a,#111827);
+  background:#0f172a;
   color:#fff;
   max-width:430px;
   margin:auto;
   padding:16px;
 }
 
-.hero,.card{
+.card{
   background:#111827;
-  border-radius:24px;
-  padding:18px;
-  margin-bottom:16px;
+  padding:16px;
+  border-radius:20px;
+  margin-bottom:14px;
 }
 
 .day{
   display:flex;
   gap:10px;
   background:#1f2937;
-  border-radius:16px;
   padding:12px;
-  margin:8px 0;
-}
-
-.day input[type="checkbox"]{
-  width:18px;
-  height:18px;
+  border-radius:12px;
+  margin:6px 0;
 }
 
 .bar{
   height:10px;
   background:#334155;
   border-radius:999px;
-  overflow:hidden;
 }
 
 .fill{
@@ -61,9 +53,9 @@ body{
 input{
   width:100%;
   padding:12px;
+  margin-top:6px;
   border:none;
-  border-radius:12px;
-  margin-top:8px;
+  border-radius:10px;
   background:#1f2937;
   color:#fff;
 }
@@ -71,59 +63,64 @@ input{
 button{
   width:100%;
   padding:12px;
-  border:none;
-  border-radius:12px;
-  background:#f97316;
-  color:white;
   margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:#f97316;
+  color:#fff;
   font-weight:bold;
 }
 
 .log-item{
   background:#1f2937;
   padding:10px;
-  border-radius:12px;
-  margin-top:8px;
+  border-radius:10px;
+  margin-top:6px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="hero">
-  <h2>🚴 Cycling Tracker</h2>
-  <div>Прогрес: <span id="progressText">0%</span></div>
-  <div class="bar"><div id="progressBar" class="fill"></div></div>
+<div class="card">
+<h2>🚴 Cycling Tracker</h2>
+<div>Прогрес: <span id="progressText">0%</span></div>
+<div class="bar"><div id="progressBar" class="fill"></div></div>
 
-  <div style="margin-top:10px;">
-    🔥 Калории: <span id="totalCalories">0</span><br>
-    ⚖️ Тегло: <span id="latestWeight">-</span>
-  </div>
+<div style="margin-top:10px;">
+🔥 Калории: <span id="totalCalories">0</span><br>
+⚖️ Тегло: <span id="latestWeight">-</span>
+</div>
 </div>
 
 <div id="weeks"></div>
 
 <div class="card">
-  <h3>Добави тренировка</h3>
-  <input id="caloriesInput" type="number" placeholder="Калории">
-  <input id="weightInput" type="number" placeholder="Тегло">
-  <button onclick="saveWorkoutLog()">Запази</button>
+<h3>Добави тренировка</h3>
+<input id="caloriesInput" type="number" placeholder="Калории">
+<input id="weightInput" type="number" placeholder="Тегло">
+<button onclick="saveWorkoutLog()">Запази</button>
 </div>
 
 <div class="card">
-  <h3>История</h3>
-  <div id="history"></div>
+<h3>📊 Прогрес</h3>
+<div id="summary"></div>
+</div>
+
+<div class="card">
+<h3>📚 История</h3>
+<div id="history"></div>
 </div>
 
 <script>
 
 // 🔥 SUPABASE
 const supabaseClient = supabase.createClient(
-  'https://kudsnoxcgisxzzltlfwr.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1ZHNub3hjZ2lzeHp6bHRsZndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjIyNDIsImV4cCI6MjA5MTkzODI0Mn0.4hUFvZJAnObCQRVHijsoMWdpXbnZt0oiKC2bZ_n9Idw'
+'https://kudsnoxcgisxzzltlfwr.supabase.co',
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1ZHNub3hjZ2lzeHp6bHRsZndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjIyNDIsImV4cCI6MjA5MTkzODI0Mn0.4hUFvZJAnObCQRVHijsoMWdpXbnZt0oiKC2bZ_n9Idw'
 );
 
-// 📅 ТРЕНИРОВКИ
+// 🚴 ПОДРОБЕН ПЛАН
 const weeks = [
   {
     title: 'Седмица 1',
@@ -175,6 +172,7 @@ const weeks = [
   }
 ];
 
+// 📅 RENDER WEEKS
 const weeksEl = document.getElementById('weeks');
 let total = 0;
 
@@ -200,43 +198,67 @@ weeks.forEach((week, wi) => {
   weeksEl.appendChild(card);
 });
 
-// 💾 LOCAL STORAGE
-function getLogs(){
-  return JSON.parse(localStorage.getItem('logs') || '[]');
+// ☁️ LOAD FROM DB
+async function loadFromSupabase() {
+  const { data, error } = await supabaseClient
+    .from('workouts')
+    .select('*')
+    .order('id');
+
+  if (error) {
+    console.log(error);
+    return [];
+  }
+
+  return data;
 }
 
-function setLogs(logs){
-  localStorage.setItem('logs', JSON.stringify(logs));
-}
-
-// 🚀 SAVE WORKOUT
+// 💾 SAVE
 async function saveWorkoutLog(){
   const calories = Number(document.getElementById('caloriesInput').value);
   const weight = Number(document.getElementById('weightInput').value);
 
   if(!calories || !weight) return;
 
-  const log = {
-    date: new Date().toLocaleDateString('bg-BG'),
-    calories,
-    weight
-  };
-
-  // 🔥 SAVE TO SUPABASE
-  await supabaseClient.from('workouts').insert([log]);
-
-  // 💾 SAVE LOCAL
-  const logs = getLogs();
-  logs.push(log);
-  setLogs(logs);
+  await supabaseClient.from('workouts').insert([
+    {
+      date:new Date().toLocaleDateString('bg-BG'),
+      calories,
+      weight
+    }
+  ]);
 
   renderLogs();
-
-  document.getElementById('caloriesInput').value = '';
-  document.getElementById('weightInput').value = '';
 }
 
-// 📊 PROGRESS
+// 📊 RENDER LOGS
+async function renderLogs(){
+  const logs = await loadFromSupabase();
+  if(!logs.length) return;
+
+  const totalCalories = logs.reduce((a,l)=>a+l.calories,0);
+
+  const firstWeight = logs[0].weight;
+  const lastWeight = logs[logs.length-1].weight;
+
+  document.getElementById('totalCalories').textContent = totalCalories;
+  document.getElementById('latestWeight').textContent = lastWeight+' кг';
+
+  document.getElementById('history').innerHTML =
+    logs.map(l=>`
+      <div class="log-item">
+        📅 ${l.date} • 🔥 ${l.calories} kcal • ⚖️ ${l.weight} кг
+      </div>
+    `).reverse().join('');
+
+  document.getElementById('summary').innerHTML = `
+    <div class="log-item">🔥 Калории: ${totalCalories}</div>
+    <div class="log-item">⚖️ Разлика: ${(lastWeight-firstWeight).toFixed(1)} кг</div>
+    <div class="log-item">📅 Тренировки: ${logs.length}</div>
+  `;
+}
+
+// 📈 PROGRESS
 function updateProgress(){
   let done = 0;
 
@@ -249,24 +271,6 @@ function updateProgress(){
 
   document.getElementById('progressText').textContent = pct+'%';
   document.getElementById('progressBar').style.width = pct+'%';
-}
-
-// 📚 HISTORY
-function renderLogs(){
-  const logs = getLogs();
-
-  const totalCalories = logs.reduce((a,l)=>a+l.calories,0);
-  const latest = logs[logs.length-1];
-
-  document.getElementById('totalCalories').textContent = totalCalories;
-  document.getElementById('latestWeight').textContent = latest ? latest.weight+' кг' : '-';
-
-  document.getElementById('history').innerHTML =
-    logs.map(l=>`
-      <div class="log-item">
-        📅 ${l.date} • 🔥 ${l.calories} kcal • ⚖️ ${l.weight} кг
-      </div>
-    `).reverse().join('');
 }
 
 function saveCheck(key,val){
