@@ -49,6 +49,10 @@ body{
   margin-top:80px;
 }
 
+#weeks{
+  transition: transform 0.2s ease;
+}
+
 .day{
   display:flex;
   gap:10px;
@@ -225,6 +229,56 @@ button{
 
 
 <script>
+
+
+
+
+let startX = 0;
+let endX = 0;
+
+const app = document.getElementById('app');
+
+app.addEventListener('touchstart', (e) => {
+  startX = e.touches[0].clientX;
+});
+
+app.addEventListener('touchend', (e) => {
+  endX = e.changedTouches[0].clientX;
+  handleSwipe();
+});
+
+function handleSwipe(){
+  const diff = startX - endX;
+
+  // 👉 swipe наляво (следваща седмица)
+  if(diff > 50){
+    if(currentWeek < weeks.length - 1){
+      currentWeek++;
+      localStorage.setItem('currentWeek', currentWeek);
+      renderWeeks();
+    }
+  }
+
+  // 👉 swipe надясно (предишна)
+  if(diff < -50){
+    if(currentWeek > 0){
+      currentWeek--;
+      localStorage.setItem('currentWeek', currentWeek);
+      renderWeeks();
+    }
+  }
+}
+
+function animateSwipe(direction){
+  const el = document.getElementById('weeks');
+
+  el.style.transform = `translateX(${direction}px)`;
+
+  setTimeout(() => {
+    el.style.transform = 'translateX(0)';
+  }, 200);
+}
+
 
 function resetProgress(){
   localStorage.clear();
