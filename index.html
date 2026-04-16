@@ -7,7 +7,84 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#f97316">
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#0f172a,#111827);color:#fff;max-width:430px;margin-inline:auto;padding:16px}.hero,.card{background:rgba(17,24,39,.95);border:1px solid rgba(255,255,255,.06);border-radius:24px;padding:18px;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.25)}.day{display:flex;gap:12px;align-items:flex-start;background:#1f2937;border-radius:18px;padding:14px;margin:10px 0}.bar{height:12px;background:#334155;border-radius:999px;overflow:hidden;margin-top:8px}.fill{height:100%;background:linear-gradient(90deg,#f97316,#fb923c);transition:width .3s ease}.small{color:#94a3b8;font-size:13px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.stat-box{background:#1f2937;border-radius:18px;padding:14px}input{width:100%;padding:12px;border-radius:14px;border:none;background:#1f2937;color:#fff;margin-top:8px}button{width:100%;padding:12px;border:none;border-radius:14px;background:#f97316;color:#fff;font-weight:700;margin-top:10px}.log-item{background:#1f2937;border-radius:14px;padding:12px;margin-top:8px;font-size:14px}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'Inter',Arial,sans-serif;
+  background:linear-gradient(180deg,#0f172a,#111827);
+  color:#fff;
+  max-width:430px;
+  margin-inline:auto;
+  padding:16px;
+  line-height:1.55;
+  letter-spacing:0.1px;
+}
+.hero,.card{
+  background:rgba(17,24,39,.95);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:24px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25)
+}
+.day{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  background:#1f2937;
+  border-radius:18px;
+  padding:14px;
+  margin:10px 0
+}
+.day input{
+  margin-top:4px;
+  transform:scale(1.15);
+}
+.day span{
+  flex:1;
+  text-align:left;
+  font-size:14px;
+}
+.bar{height:12px;background:#334155;border-radius:999px;overflow:hidden;margin-top:8px}
+.fill{height:100%;background:linear-gradient(90deg,#f97316,#fb923c);transition:width .3s ease}
+.small{color:#94a3b8;font-size:13px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.stat-box{background:#1f2937;border-radius:18px;padding:14px}
+input{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  background:#1f2937;
+  color:#fff;
+  margin-top:8px;
+  font-size:16px;
+}
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:#f97316;
+  color:#fff;
+  font-weight:800;
+  margin-top:12px;
+  font-family:'Inter',Arial,sans-serif;
+}
+.log-item{
+  background:#1f2937;
+  border-radius:14px;
+  padding:12px;
+  margin-top:8px;
+  font-size:14px;
+  line-height:1.5;
+}
+h2,h3{
+  margin:0 0 8px;
+  font-weight:800;
+  letter-spacing:-0.2px;
+}
 </style>
 </head>
 <body>
