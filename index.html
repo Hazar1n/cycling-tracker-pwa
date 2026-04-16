@@ -240,6 +240,8 @@ button{
 
 <script>
 
+const startDate = new Date(2026, 3, 15); // 15 април (месеците са 0-index!)
+
 function getProgramDay(){
   const today = new Date();
 
@@ -257,9 +259,6 @@ function getWeekAndDay(){
 
   return { weekIndex, dayIndex };
 }
-
-const dayNumber = getProgramDay() + 1;
-
 
 let startX = 0;
 let endX = 0;
@@ -316,6 +315,8 @@ function renderToday(){
 
   const { weekIndex, dayIndex } = getWeekAndDay();
 
+  const dayNumber = getProgramDay() + 1;
+
   // 🔥 sync currentWeek
   currentWeek = Math.min(weekIndex, weeks.length - 1);
   localStorage.setItem('currentWeek', currentWeek);
@@ -346,8 +347,6 @@ function animateSwipe(direction){
     el.style.transform = 'translateX(0)';
   }, 200);
 }
-
-const startDate = new Date(2026, 3, 15); // 15 април (месеците са 0-index!)
 
 function resetProgress(){
   localStorage.clear();
