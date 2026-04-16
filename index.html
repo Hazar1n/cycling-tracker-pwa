@@ -99,39 +99,56 @@ button{
 
 <div id="app" style="display:none">
 
-<div class="card">
-<h2>🚴 Cycling Tracker</h2>
-<div>Прогрес: <span id="progressText">0%</span></div>
-<div class="bar"><div id="progressBar" class="fill"></div></div>
+  <!-- HEADER -->
+  <div class="card">
+    <h2>🚴 Cycling Tracker</h2>
 
-<div style="margin-top:10px;">
-🔥 Калории: <span id="totalCalories">0</span><br>
-⚖️ Тегло: <span id="latestWeight">-</span>
-</div>
+    <button onclick="logout()" style="margin-bottom:10px;">
+      🚪 Изход
+    </button>
+
+    <div>Прогрес: <span id="progressText">0%</span></div>
+    <div class="bar">
+      <div id="progressBar" class="fill"></div>
+    </div>
+
+    <div style="margin-top:10px;">
+      🔥 Калории: <span id="totalCalories">0</span><br>
+      ⚖️ Тегло: <span id="latestWeight">-</span>
+    </div>
+  </div>
+
+  <!-- 🚴 СЕДМИЦИ (ТОВА ЛИПСВАШЕ!) -->
+  <div id="weeks"></div>
+
+  <!-- ➕ ДОБАВЯНЕ -->
+  <div class="card">
+    <h3>Добави тренировка</h3>
+    <input id="caloriesInput" type="number" placeholder="Калории">
+    <input id="weightInput" type="number" placeholder="Тегло">
+    <button onclick="saveWorkoutLog()">Запази</button>
+  </div>
+
+  <!-- 📊 ПРОГРЕС -->
+  <div class="card">
+    <h3>📊 Прогрес</h3>
+    <div id="summary"></div>
+  </div>
+
+  <!-- 📚 ИСТОРИЯ -->
+  <div class="card">
+    <h3>📚 История</h3>
+    <div id="history"></div>
+  </div>
+
+  <!-- 📈 ГРАФИКА -->
+  <div class="card">
+    <h3>📈 Графика на теглото</h3>
+    <canvas id="weightChart"></canvas>
+  </div>
+
 </div>
 
-<div class="card">
-<h3>Добави тренировка</h3>
-<input id="caloriesInput" type="number" placeholder="Калории">
-<input id="weightInput" type="number" placeholder="Тегло">
-<button onclick="saveWorkoutLog()">Запази</button>
-</div>
-
-<div class="card">
-<h3>📊 Прогрес</h3>
-<div id="summary"></div>
-</div>
-
-<div class="card">
-<h3>📚 История</h3>
-<div id="history"></div>
-</div>
-
-<div class="card">
-  <h3>📈 Графика на теглото</h3>
-  <canvas id="weightChart"></canvas>
-</div>
-</div>
 
 <script>
 
@@ -254,29 +271,28 @@ const weeks = [
 
 // 📅 RENDER WEEKS
 const weeksEl = document.getElementById('weeks');
-let total = 0;
 
-weeks.forEach((week, wi) => {
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML = `<h3>${week.title}</h3>`;
+function renderWeeks(){
+  const weeksEl = document.getElementById('weeks');
+  if(!weeksEl) return;
 
-  week.days.forEach((day, di) => {
-    total++;
-    const key = `${wi}-${di}`;
-    const checked = localStorage.getItem(key) === '1';
+  weeksEl.innerHTML = '';
 
-    const row = document.createElement('label');
-    row.className = 'day';
-    row.innerHTML = `
-      <input type="checkbox" ${checked ? 'checked' : ''} onchange="saveCheck('${key}', this.checked)">
-      <span>${day}</span>
-    `;
-    card.appendChild(row);
+  weeks.forEach((week) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<h3>${week.title}</h3>`;
+
+    week.days.forEach((day) => {
+      const row = document.createElement('label');
+      row.className = 'day';
+      row.innerHTML = `<span>${day}</span>`;
+      card.appendChild(row);
+    });
+
+    weeksEl.appendChild(card);
   });
-
-  weeksEl.appendChild(card);
-});
+}
 
 // ☁️ LOAD FROM DB
 async function loadFromSupabase() {
