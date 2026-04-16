@@ -50,7 +50,7 @@ body{
   background:#f97316;
 }
 
-input{
+input[type="number"] {
   width:100%;
   padding:12px;
   margin-top:6px;
@@ -58,6 +58,11 @@ input{
   border-radius:10px;
   background:#1f2937;
   color:#fff;
+}
+.day input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  flex:none;
 }
 
 button{
@@ -218,17 +223,29 @@ async function saveWorkoutLog(){
   const calories = Number(document.getElementById('caloriesInput').value);
   const weight = Number(document.getElementById('weightInput').value);
 
-  if(!calories || !weight) return;
+  if(!calories || !weight){
+    alert("Въведи калории и тегло!");
+    return;
+  }
 
-  await supabaseClient.from('workouts').insert([
-    {
-      date:new Date().toLocaleDateString('bg-BG'),
-      calories,
-      weight
-    }
-  ]);
+  const { data, error } = await supabaseClient
+    .from('workouts')
+    .insert([
+      {
+        date: new Date().toLocaleDateString('bg-BG'),
+        calories,
+        weight
+      }
+    ]);
 
-  renderLogs();
+  if(error){
+    console.log(error);
+    alert("Грешка: " + error.message);
+  } else {
+    alert("Записано ✅");
+  }
+
+  await renderLogs();
 }
 
 // 📊 RENDER LOGS
