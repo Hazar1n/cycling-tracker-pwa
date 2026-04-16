@@ -304,26 +304,15 @@ async function saveWorkoutLog(){
 }
 
 // 📊 RENDER LOGS
-async function loadFromSupabase() {
+async function renderLogs() {
+  const logs = await loadFromSupabase();
 
-  const { data: userData } = await supabaseClient.auth.getUser();
-  const user = userData.user;
+  const caloriesEl = document.getElementById('totalCalories');
+  const weightEl = document.getElementById('latestWeight');
+  const historyEl = document.getElementById('history');
+  const summaryEl = document.getElementById('summary');
 
-  if(!user) return [];
-
-  const { data, error } = await supabaseClient
-    .from('workouts')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('id', { ascending: true });
-
-  if(error){
-    console.log(error);
-    return [];
-  }
-
-  return data;
-}
+  if(logs.length === 0) return;
 
   // 👉 ТУК е правилното място
   renderChart(logs);
@@ -346,6 +335,27 @@ async function loadFromSupabase() {
     <div class="log-item">🔥 Общо калории: ${totalCalories}</div>
     <div class="log-item">⚖️ Разлика: ${(lastWeight-firstWeight).toFixed(1)} кг</div>
   `;
+}
+
+async function loadFromSupabase() {
+
+  const { data: userData } = await supabaseClient.auth.getUser();
+  const user = userData.user;
+
+  if(!user) return [];
+
+  const { data, error } = await supabaseClient
+    .from('workouts')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('id', { ascending: true });
+
+  if(error){
+    console.log(error);
+    return [];
+  }
+
+  return data;
 }
 
 // 📊 ГРАФИКА
