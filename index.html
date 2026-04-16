@@ -88,6 +88,15 @@ button{
 
 <body>
 
+<div class="card" id="auth">
+  <h3>🔐 Вход</h3>
+  <input id="email" type="email" placeholder="Имейл">
+  <input id="password" type="password" placeholder="Парола">
+  <button onclick="signUp()">Регистрация</button>
+  <button onclick="login()">Вход</button>
+  <button onclick="logout()">Изход</button>
+</div>
+
 <div class="card">
 <h2>🚴 Cycling Tracker</h2>
 <div>Прогрес: <span id="progressText">0%</span></div>
@@ -124,6 +133,47 @@ button{
 </div>
 
 <script>
+
+// 🔐 SIGN UP
+async function signUp(){
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  if(error){
+    alert(error.message);
+  } else {
+    alert("Регистриран ✅");
+  }
+}
+
+// 🔑 LOGIN
+async function login(){
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    alert(error.message);
+  } else {
+    alert("Влязъл си ✅");
+    renderLogs();
+  }
+}
+
+// 🚪 LOGOUT
+async function logout(){
+  await supabaseClient.auth.signOut();
+  alert("Излезе");
+}
 
 // 🔥 SUPABASE
 const supabaseClient = window.supabase.createClient(
@@ -232,44 +282,48 @@ async function saveWorkoutLog(){
   const calories = Number(document.getElementById('caloriesInput').value);
   const weight = Number(document.getElementById('weightInput').value);
 
-  if(!calories || !weight){
-    alert("Въведи калории и тегло!");
+  const { data: userData } = await supabaseClient.auth.getUser();
+
+  const user = userData.user;
+
+  if(!user){
+    alert("Трябва да си логнат!");
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from('workouts')
-    .insert([
-      {
-        date: new Date().toLocaleDateString('bg-BG'),
-        calories,
-        weight
-      }
-    ]);
+  await supabaseClient.from('workouts').insert([
+    {
+      date: new Date().toLocaleDateString('bg-BG'),
+      calories,
+      weight,
+      user_id: user.id
+    }
+  ]);
 
-  if(error){
-    console.log(error);
-    alert("Грешка: " + error.message);
-  } else {
-    alert("Записано ✅");
-  }
-
-  await renderLogs();
+  renderLogs();
 }
 
 // 📊 RENDER LOGS
-async function renderLogs(){
-  const logs = await loadFromSupabase();
+async function loadFromSupabase() {
 
-  const historyEl = document.getElementById('history');
-  const caloriesEl = document.getElementById('totalCalories');
-  const weightEl = document.getElementById('latestWeight');
-  const summaryEl = document.getElementById('summary');
+  const { data: userData } = await supabaseClient.auth.getUser();
+  const user = userData.user;
 
-  if(!logs || logs.length === 0){
-    historyEl.innerHTML = "Няма данни още";
-    return;
+  if(!user) return [];
+
+  const { data, error } = await supabaseClient
+    .from('workouts')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('id', { ascending: true });
+
+  if(error){
+    console.log(error);
+    return [];
   }
+
+  return data;
+}
 
   // 👉 ТУК е правилното място
   renderChart(logs);
