@@ -279,25 +279,24 @@ app.addEventListener('touchend', (e) => {
 function handleSwipe(){
   const diff = startX - endX;
 
-  // 👉 swipe наляво (следваща седмица)
   if(diff > 50){
-  if(currentWeek < weeks.length - 1){
-    currentWeek++;
-    localStorage.setItem('currentWeek', currentWeek);
-    renderWeeks();
-    renderToday(); // 🔥
+    if(currentWeek < weeks.length - 1){
+      currentWeek++;
+      localStorage.setItem('currentWeek', currentWeek);
+      renderWeeks();
+      renderToday();
+    }
   }
-}
 
-if(diff < -50){
-  if(currentWeek > 0){
-    currentWeek--;
-    localStorage.setItem('currentWeek', currentWeek);
-    renderWeeks();
-    renderToday(); // 🔥
+  if(diff < -50){
+    if(currentWeek > 0){
+      currentWeek--;
+      localStorage.setItem('currentWeek', currentWeek);
+      renderWeeks();
+      renderToday();
+    }
   }
-}
-
+} // 🔥 ТОВА ЛИПСВАШЕ
 let showWeek = false;
 
 function toggleWeek(){
@@ -336,7 +335,7 @@ function renderToday(){
     <span>${day}</span>
   </div>
 `;
-
+}
 
 function animateSwipe(direction){
   const el = document.getElementById('weeks');
