@@ -51,15 +51,17 @@ body{
   background:#f97316;
 }
 
-input[type="number"] {
+input{
   width:100%;
-  padding:12px;
-  margin-top:6px;
+  padding:16px;
+  margin-top:8px;
   border:none;
-  border-radius:10px;
+  border-radius:14px;
   background:#1f2937;
   color:#fff;
+  font-size:16px;
 }
+
 .day input[type="checkbox"]{
   width:18px;
   height:18px;
@@ -89,12 +91,19 @@ button{
 <body>
 
 <div class="card" id="auth">
-  <h3>🔐 Вход</h3>
+  <h2 style="margin-bottom:10px;">🔐 Вход в акаунт</h2>
+
   <input id="email" type="email" placeholder="Имейл">
   <input id="password" type="password" placeholder="Парола">
-  <button onclick="signUp()">Регистрация</button>
-  <button onclick="login()">Вход</button>
-  <button onclick="logout()">Изход</button>
+
+  <div style="display:flex; gap:10px;">
+    <button onclick="login()" style="flex:1; background:#22c55e;">
+      Вход
+    </button>
+    <button onclick="signUp()" style="flex:1;">
+      Регистрация
+    </button>
+  </div>
 </div>
 
 <div id="app" style="display:none">
@@ -103,7 +112,7 @@ button{
   <div class="card">
     <h2>🚴 Cycling Tracker</h2>
 
-    <button onclick="logout()" style="margin-bottom:10px;">
+    <button onclick="logout()" style="background:#ef4444;">
       🚪 Изход
     </button>
 
@@ -190,14 +199,15 @@ async function login(){
 // 👤 CHECK USER
 async function checkUser(){
   const { data } = await supabaseClient.auth.getUser();
-
   const user = data.user;
 
   if(user){
     document.getElementById('app').style.display = 'block';
     document.getElementById('auth').style.display = 'none';
 
+    renderWeeks();   // 🔥 ТОВА ЛИПСВАШЕ
     renderLogs();
+
   } else {
     document.getElementById('app').style.display = 'none';
     document.getElementById('auth').style.display = 'block';
@@ -207,7 +217,11 @@ async function checkUser(){
 // 🚪 LOGOUT
 async function logout(){
   await supabaseClient.auth.signOut();
-  alert("Излезе");
+
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth').style.display = 'block';
+
+  alert("Излезе успешно");
 }
 
 // 🔥 SUPABASE
@@ -278,38 +292,33 @@ function renderWeeks(){
 
   weeksEl.innerHTML = '';
 
-  weeks.forEach((week) => {
+  weeks.forEach((week, wi) => {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `<h3>${week.title}</h3>`;
 
-    week.days.forEach((day) => {
+    week.days.forEach((day, di) => {
+      const key = `${wi}-${di}`;
+      const checked = localStorage.getItem(key) === '1';
+
       const row = document.createElement('label');
       row.className = 'day';
-      row.innerHTML = `<span>${day}</span>`;
+
+      row.innerHTML = `
+        <input type="checkbox" ${checked ? 'checked' : ''} 
+        onchange="saveCheck('${key}', this.checked)">
+        <span>${day}</span>
+      `;
+
       card.appendChild(row);
     });
 
     weeksEl.appendChild(card);
   });
+
+  updateProgress();
 }
 
-// ☁️ LOAD FROM DB
-async function loadFromSupabase() {
-  const { data, error } = await supabaseClient
-    .from('workouts')
-    .select('*')
-    .order('id', { ascending: true });
-
-  if (error) {
-    console.log("Грешка при зареждане:", error);
-    return [];
-  }
-
-  console.log("ДАННИ ОТ БАЗАТА:", data);
-
-  return data || [];
-}
 
 // 💾 SAVE
 async function saveWorkoutLog(){
@@ -468,6 +477,9 @@ function saveCheck(key,val){
 checkUser();
 updateProgress();
 renderLogs();
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  checkUser();
+});
 
 </script>
 
