@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#f97316">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -115,6 +116,11 @@ button{
 <div class="card">
 <h3>📚 История</h3>
 <div id="history"></div>
+</div>
+
+<div class="card">
+  <h3>📈 Графика на теглото</h3>
+  <canvas id="weightChart"></canvas>
 </div>
 
 <script>
@@ -296,6 +302,51 @@ async function renderLogs(){
   `;
 }
 
+// 📊 ГРАФИКА
+let chart;
+
+function renderChart(logs){
+  const ctx = document.getElementById('weightChart');
+
+  const labels = logs.map(l => l.date);
+  const weights = logs.map(l => Number(l.weight));
+
+  if(chart){
+    chart.destroy();
+  }
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Тегло (кг)',
+        data: weights,
+        borderColor: '#f97316',
+        backgroundColor: 'rgba(249,115,22,0.2)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: { color: '#fff' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#ccc' }
+        },
+        y: {
+          ticks: { color: '#ccc' }
+        }
+      }
+    }
+  });
+}
+
+
 // 📈 PROGRESS
 function updateProgress(){
   let done = 0;
@@ -318,6 +369,7 @@ function saveCheck(key,val){
 
 updateProgress();
 renderLogs();
+renderChart(logs);
 
 </script>
 
