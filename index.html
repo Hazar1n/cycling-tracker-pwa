@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cycling Tracker Pro</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#0f172a" />
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #fff;
+  max-width: 430px;
+  margin-inline: auto;
+  padding: 16px;
+}
+.hero, .card {
+  background: #111827;
+  border-radius: 22px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.day {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #1f2937;
+  border-radius: 16px;
+  padding: 12px;
+  margin: 10px 0;
+}
+.bar {
+  height: 10px;
+  background: #334155;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  background: #f97316;
+}
+input[type='number'] {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: #1f2937;
+  color: white;
+}
+.small {
+  color: #94a3b8;
+  font-size: 13px;
+}
+h2, h3 { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h2>🚴 Cycling Tracker Pro</h2>
+  <div class="small">Fat loss • 4 седмици • PWA ready</div>
+  <div style="margin-top:10px">Общ прогрес: <span id="progressText">0%</span></div>
+  <div class="bar"><div class="fill" id="progressBar" style="width:0%"></div></div>
+</div>
+
+<div id="weeks"></div>
+
+<div class="card">
+  <h3>⚖️ Fat Loss Tracker</h3>
+  <div class="small">Въведи теглото си</div>
+  <input id="weight" type="number" placeholder="Текущо тегло (кг)" />
+</div>
+
+<script>
+const weeks = [
+  {
+    title: 'Седмица 1',
+    days: [
+      'Понеделник • Почивка • разтягане 10–15 мин',
+      'Вторник • 30 км • Zone 2 • 150–160 W',
+      'Сряда • 25 км • 4x3 мин @ 190–200 W',
+      'Четвъртък • 15 км Recovery',
+      'Петък • 25 км Tempo',
+      'Събота • 40 км Long Ride',
+      'Неделя • Почивка'
+    ]
+  },
+  {
+    title: 'Седмица 2',
+    days: [
+      'Понеделник • Почивка',
+      'Вторник • 35 км • Zone 2',
+      'Сряда • 30 км • 5x3 мин @ 195–205 W',
+      'Четвъртък • 15 км Recovery',
+      'Петък • 30 км Tempo',
+      'Събота • 45 км Long Ride',
+      'Неделя • Почивка'
+    ]
+  },
+  {
+    title: 'Седмица 3',
+    days: [
+      'Понеделник • Почивка',
+      'Вторник • 35 км • Zone 2',
+      'Сряда • 30 км • 4x4 мин @ 195–205 W',
+      'Четвъртък • 20 км Recovery',
+      'Петък • 30 км Tempo',
+      'Събота • 50 км Long Ride',
+      'Неделя • Почивка'
+    ]
+  },
+  {
+    title: 'Седмица 4 (разтоварваща)',
+    days: [
+      'Понеделник • Почивка',
+      'Вторник • 25 км Easy',
+      'Сряда • 20 км • 3x3 мин @ 190 W',
+      'Четвъртък • Почивка',
+      'Петък • 20 км Easy',
+      'Събота • 35 км Long Easy',
+      'Неделя • Почивка'
+    ]
+  }
+];
+
+const weeksEl = document.getElementById('weeks');
+let total = 0;
+
+weeks.forEach((week, wi) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<h3>${week.title}</h3>`;
+
+  week.days.forEach((day, di) => {
+    total++;
+    const key = `${wi}-${di}`;
+    const checked = localStorage.getItem(key) === '1';
+
+    const row = document.createElement('label');
+    row.className = 'day';
+    row.innerHTML = `
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="saveCheck('${key}', this.checked)">
+      <span>${day}</span>
+    `;
+    card.appendChild(row);
+  });
+
+  weeksEl.appendChild(card);
+});
+
+function saveCheck(key, value) {
+  localStorage.setItem(key, value ? '1' : '0');
+  updateProgress();
+}
+
+function updateProgress() {
+  let done = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.includes('-') && localStorage.getItem(k) === '1') done++;
+  }
+  const pct = Math.round((done / total) * 100) || 0;
+  document.getElementById('progressText').textContent = pct + '%';
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+const weightInput = document.getElementById('weight');
+weightInput.value = localStorage.getItem('weight') || '';
+weightInput.addEventListener('input', e => {
+  localStorage.setItem('weight', e.target.value);
+});
+
+updateProgress();
+</script>
+
+</body>
+</html>
