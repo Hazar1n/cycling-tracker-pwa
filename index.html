@@ -50,6 +50,7 @@ body{
 }
 
 #weeks{
+  display: none;
   transition: transform 0.2s ease;
 }
 
@@ -239,7 +240,12 @@ button{
 
 <script>
 
+function getTodayIndex(){
+  const day = new Date().getDay();
 
+  // 0 = Sunday → правим го последен ден
+  return day === 0 ? 6 : day - 1;
+}
 
 
 let startX = 0;
@@ -283,7 +289,13 @@ let showWeek = false;
 function toggleWeek(){
   showWeek = !showWeek;
 
-  document.getElementById('weeks').style.display = showWeek ? 'block' : 'none';
+  const el = document.getElementById('weeks');
+
+  el.style.display = showWeek ? 'block' : 'none';
+
+  if(showWeek){
+    renderWeeks(); // 🔥 важно
+  }
 }
 
 function renderToday(){
