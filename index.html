@@ -191,6 +191,15 @@ button{
     </div>
   </div>
 
+  <div class="card" id="todayCard">
+  <h3>📅 Днес</h3>
+  <div id="todayContent"></div>
+</div>
+
+<button onclick="toggleWeek()" style="background:#3b82f6;">
+  📄 Седмица
+</button>
+
   <!-- 🚴 СЕДМИЦИ (ТОВА ЛИПСВАШЕ!) -->
   <div id="weeks"></div>
 
@@ -269,6 +278,33 @@ function handleSwipe(){
   }
 }
 
+let showWeek = false;
+
+function toggleWeek(){
+  showWeek = !showWeek;
+
+  document.getElementById('weeks').style.display = showWeek ? 'block' : 'none';
+}
+
+function renderToday(){
+  const todayEl = document.getElementById('todayContent');
+
+  const dayIndex = getTodayIndex();
+  const week = weeks[currentWeek];
+  const day = week.days[dayIndex];
+
+  const key = `${currentWeek}-${dayIndex}`;
+  const checked = localStorage.getItem(key) === '1';
+
+  todayEl.innerHTML = `
+    <div class="day">
+      <input type="checkbox" ${checked ? 'checked' : ''}
+      onchange="saveCheck('${key}', this.checked)">
+      <span>${day}</span>
+    </div>
+  `;
+}
+
 function animateSwipe(direction){
   const el = document.getElementById('weeks');
 
@@ -329,11 +365,12 @@ async function checkUser(){
   const user = data.user;
 
   if(user){
-    document.getElementById('app').style.display = 'block';
-    document.getElementById('auth').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('auth').style.display = 'none';
 
-    renderWeeks();   // 🔥 ТОВА ЛИПСВАШЕ
-    renderLogs();
+  renderToday();   // 🔥 ново
+  renderWeeks();
+  renderLogs();
 
   } else {
     document.getElementById('app').style.display = 'none';
@@ -628,7 +665,9 @@ function saveCheck(key,val){
   localStorage.setItem(key, val ? '1' : '0');
 
   updateProgress();
-  checkWeekCompletion(); // 🔥 важно
+  checkWeekCompletion();
+  renderWeeks();
+  renderToday(); // 🔥 sync
 }
 
 checkUser();
