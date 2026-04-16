@@ -439,17 +439,25 @@ function renderChart(logs){
 
 // 📈 PROGRESS
 function updateProgress(){
+
+  let total = 0;
   let done = 0;
 
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if(k.includes('-') && localStorage.getItem(k)==='1') done++;
-  }
+  weeks.forEach((week, wi) => {
+    week.days.forEach((day, di) => {
+      total++;
 
-  const pct = Math.round((done/total)*100)||0;
+      const key = `${wi}-${di}`;
+      if(localStorage.getItem(key) === '1'){
+        done++;
+      }
+    });
+  });
 
-  document.getElementById('progressText').textContent = pct+'%';
-  document.getElementById('progressBar').style.width = pct+'%';
+  const pct = total ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('progressText').textContent = pct + '%';
+  document.getElementById('progressBar').style.width = pct + '%';
 }
 
 function saveCheck(key,val){
