@@ -208,14 +208,16 @@ async function loadFromSupabase() {
   const { data, error } = await supabaseClient
     .from('workouts')
     .select('*')
-    .order('id');
+    .order('id', { ascending: true });
 
   if (error) {
-    console.log(error);
+    console.log("Грешка при зареждане:", error);
     return [];
   }
 
-  return data;
+  console.log("ДАННИ ОТ БАЗАТА:", data);
+
+  return data || [];
 }
 
 // 💾 SAVE
@@ -251,26 +253,44 @@ async function saveWorkoutLog(){
 // 📊 RENDER LOGS
 async function renderLogs(){
   const logs = await loadFromSupabase();
-  if(!logs.length) return;
 
-  const totalCalories = logs.reduce((a,l)=>a+l.calories,0);
+  const historyEl = document.getElementById('history');
+  const caloriesEl = document.getElementById('totalCalories');
+  const weightEl = document.getElementById('latestWeight');
+  const summaryEl = document.getElementById('summary');
 
-  const firstWeight = logs[0].weight;
-  const lastWeight = logs[logs.length-1].weight;
+  // ❗ ако няма данни
+  if(!logs || logs.length === 0){
+    historyEl.innerHTML = "Няма данни още";
+    caloriesEl.textContent = "0";
+    weightEl.textContent = "-";
+    summaryEl.innerHTML = "";
+    return;
+  }
 
-  document.getElementById('totalCalories').textContent = totalCalories;
-  document.getElementById('latestWeight').textContent = lastWeight+' кг';
+  // 🔥 общи калории
+  const totalCalories = logs.reduce((sum, l) => sum + Number(l.calories || 0), 0);
 
-  document.getElementById('history').innerHTML =
-    logs.map(l=>`
-      <div class="log-item">
-        📅 ${l.date} • 🔥 ${l.calories} kcal • ⚖️ ${l.weight} кг
-      </div>
-    `).reverse().join('');
+  // ⚖️ тегло
+  const firstWeight = Number(logs[0].weight);
+  const lastWeight = Number(logs[logs.length - 1].weight);
+  const diff = (lastWeight - firstWeight).toFixed(1);
 
-  document.getElementById('summary').innerHTML = `
-    <div class="log-item">🔥 Калории: ${totalCalories}</div>
-    <div class="log-item">⚖️ Разлика: ${(lastWeight-firstWeight).toFixed(1)} кг</div>
+  // 📊 показване
+  caloriesEl.textContent = totalCalories;
+  weightEl.textContent = lastWeight + " кг";
+
+  // 📚 история
+  historyEl.innerHTML = logs.map(l => `
+    <div class="log-item">
+      📅 ${l.date} • 🔥 ${l.calories} kcal • ⚖️ ${l.weight} кг
+    </div>
+  `).reverse().join('');
+
+  // 📈 summary
+  summaryEl.innerHTML = `
+    <div class="log-item">🔥 Общо калории: ${totalCalories}</div>
+    <div class="log-item">⚖️ Промяна: ${diff} кг</div>
     <div class="log-item">📅 Тренировки: ${logs.length}</div>
   `;
 }
