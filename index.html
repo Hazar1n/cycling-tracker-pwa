@@ -3,230 +3,153 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Cycling Tracker Pro</title>
+<title>Cycling Tracker Pro V3</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#f97316">
 <style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: Inter, Arial, sans-serif;
-  background: linear-gradient(180deg, #0f172a, #111827);
-  color: #fff;
-  max-width: 430px;
-  margin-inline: auto;
-  padding: 16px;
-}
-
-.hero, .card {
-  background: rgba(17, 24, 39, 0.95);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 24px;
-  padding: 18px;
-  margin-bottom: 16px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-}
-
-.day {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  background: #1f2937;
-  border-radius: 18px;
-  padding: 14px;
-  margin: 10px 0;
-  transition: 0.2s ease;
-}
-
-.day:hover {
-  transform: scale(1.01);
-}
-
-.bar {
-  height: 12px;
-  background: #334155;
-  border-radius: 999px;
-  overflow: hidden;
-  margin-top: 8px;
-}
-
-.fill {
-  height: 100%;
-  background: linear-gradient(90deg, #f97316, #fb923c);
-  transition: width 0.3s ease;
-}
-
-input[type='number'] {
-  width: 100%;
-  padding: 14px;
-  border-radius: 16px;
-  border: none;
-  background: #1f2937;
-  color: white;
-  font-size: 16px;
-}
-
-.small {
-  color: #94a3b8;
-  font-size: 13px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.stat-box {
-  background: #1f2937;
-  border-radius: 18px;
-  padding: 14px;
-}
-
-h2, h3 { margin: 0 0 8px; }
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#0f172a,#111827);color:#fff;max-width:430px;margin-inline:auto;padding:16px}.hero,.card{background:rgba(17,24,39,.95);border:1px solid rgba(255,255,255,.06);border-radius:24px;padding:18px;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.25)}.day{display:flex;gap:12px;align-items:flex-start;background:#1f2937;border-radius:18px;padding:14px;margin:10px 0}.bar{height:12px;background:#334155;border-radius:999px;overflow:hidden;margin-top:8px}.fill{height:100%;background:linear-gradient(90deg,#f97316,#fb923c);transition:width .3s ease}.small{color:#94a3b8;font-size:13px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.stat-box{background:#1f2937;border-radius:18px;padding:14px}input{width:100%;padding:12px;border-radius:14px;border:none;background:#1f2937;color:#fff;margin-top:8px}button{width:100%;padding:12px;border:none;border-radius:14px;background:#f97316;color:#fff;font-weight:700;margin-top:10px}.log-item{background:#1f2937;border-radius:14px;padding:12px;margin-top:8px;font-size:14px}
 </style>
 </head>
 <body>
-
 <div class="hero">
   <h2>🚴 Cycling Tracker Pro</h2>
-  <div class="small">Fat loss • 4 седмици • Premium PWA</div>
+  <div class="small">V3 • Fat loss • Full progress logging</div>
   <div style="margin-top:10px">Общ прогрес: <span id="progressText">0%</span></div>
   <div class="bar"><div class="fill" id="progressBar" style="width:0%"></div></div>
-
   <div class="stats">
-    <div class="stat-box">
-      <div class="small">🔥 Calories</div>
-      <div id="calories" style="font-size:22px;font-weight:700;">0</div>
-    </div>
-    <div class="stat-box">
-      <div class="small">🏆 Streak</div>
-      <div id="streak" style="font-size:22px;font-weight:700;">0 days</div>
-    </div>
+    <div class="stat-box"><div class="small">🔥 Общо калории</div><div id="totalCalories" style="font-size:22px;font-weight:700">0</div></div>
+    <div class="stat-box"><div class="small">⚖️ Последно тегло</div><div id="latestWeight" style="font-size:22px;font-weight:700">-</div></div>
   </div>
 </div>
 
 <div id="weeks"></div>
 
 <div class="card">
-  <h3>⚖️ Fat Loss Tracker</h3>
-  <div class="small">Въведи теглото си</div>
-  <input id="weight" type="number" placeholder="Текущо тегло (кг)" />
+  <h3>📝 Запис след тренировка</h3>
+  <div class="small">Въведи калории и тегло след всяко каране</div>
+  <input id="caloriesInput" type="number" placeholder="Изгорени калории" />
+  <input id="weightInput" type="number" placeholder="Тегло след тренировка (кг)" />
+  <button onclick="saveWorkoutLog()">Запази тренировка</button>
+</div>
+
+<div class="card">
+  <h3>📈 Прогрес след 4 седмици</h3>
+  <div id="summary"></div>
+</div>
+
+<div class="card">
+  <h3>📚 История</h3>
+  <div id="history"></div>
 </div>
 
 <script>
-const weeks = [
-  {
-    title: 'Седмица 1',
-    days: [
-      'Понеделник • Почивка • разтягане 10–15 мин',
-      'Вторник • 30 км • Zone 2 • 150–160 W',
-      'Сряда • 25 км • 4x3 мин @ 190–200 W',
-      'Четвъртък • 15 км Recovery',
-      'Петък • 25 км Tempo',
-      'Събота • 40 км Long Ride',
-      'Неделя • Почивка'
-    ]
-  },
-  {
-    title: 'Седмица 2',
-    days: [
-      'Понеделник • Почивка',
-      'Вторник • 35 км • Zone 2',
-      'Сряда • 30 км • 5x3 мин @ 195–205 W',
-      'Четвъртък • 15 км Recovery',
-      'Петък • 30 км Tempo',
-      'Събота • 45 км Long Ride',
-      'Неделя • Почивка'
-    ]
-  },
-  {
-    title: 'Седмица 3',
-    days: [
-      'Понеделник • Почивка',
-      'Вторник • 35 км • Zone 2',
-      'Сряда • 30 км • 4x4 мин @ 195–205 W',
-      'Четвъртък • 20 км Recovery',
-      'Петък • 30 км Tempo',
-      'Събота • 50 км Long Ride',
-      'Неделя • Почивка'
-    ]
-  },
-  {
-    title: 'Седмица 4 (разтоварваща)',
-    days: [
-      'Понеделник • Почивка',
-      'Вторник • 25 км Easy',
-      'Сряда • 20 км • 3x3 мин @ 190 W',
-      'Четвъртък • Почивка',
-      'Петък • 20 км Easy',
-      'Събота • 35 км Long Easy',
-      'Неделя • Почивка'
-    ]
-  }
+const weeks=[
+{title:'Седмица 1',days:[
+'Понеделник • Почивка • раздвижване + стречинг + разтягане 10–15 мин',
+'Вторник • 30 км • Zone 2 • 150–160 W • steady fat burn',
+'Сряда • 25 км • Загрявка 7 км @ 140–150 W • 4x3 мин @ 190–200 W • 3 мин леко @ 100–120 W между всяка серия • разпускане леко до общите км до 25 км',
+'Четвъртък • 15 км • Recovery • 110–130 W • много леко въртене',
+'Петък • 25 км • Tempo • 170–180 W • контролирано темпо',
+'Събота • 40 км • Long Ride • Zone 2 • 150–160 W • fat loss endurance',
+'Неделя • Почивка • walk 30 мин'
+]},
+{title:'Седмица 2',days:[
+'Понеделник • Почивка • раздвижване + стречинг',
+'Вторник • 35 км • Zone 2 • 150–160 W',
+'Сряда • 30 км • Загрявка 8 км • 5x3 мин @ 195–205 W • 3 мин леко @ 100–120 W между сериите • разпускане леко до общите км до 30 км',
+'Четвъртък • 15 км • Recovery • 120 W',
+'Петък • 30 км • Tempo • 170–180 W',
+'Събота • 45 км • Long Ride • 150–160 W',
+'Неделя • Почивка • леко ходене'
+]},
+{title:'Седмица 3',days:[
+'Понеделник • Почивка • раздвижване + стречинг',
+'Вторник • 35 км • Zone 2 • 155–160 W',
+'Сряда • 30 км • Загрявка 8 км • 4x4 мин @ 195–205 W • 4 мин леко @ 100–120 W • разпускане леко до общите км',
+'Четвъртък • 20 км • Recovery • 110–125 W',
+'Петък • 30 км • Tempo • 175–185 W',
+'Събота • 50 км • Long Ride • Zone 2 • 150–160 W',
+'Неделя • Почивка • walk + stretch'
+]},
+{title:'Седмица 4',days:[
+'Понеделник • Почивка • recovery day',
+'Вторник • 25 км • Easy Zone 2 • 150–155 W',
+'Сряда • 20 км • Загрявка 5 км • 3x3 мин @ 190 W • 3 мин леко @ 100–120 W • разпускане леко до общите км',
+'Четвъртък • Почивка • раздвижване + стречинг',
+'Петък • 20 км • Easy • 120–130 W',
+'Събота • 35 км • Long Easy • 150 W',
+'Неделя • Пълна почивка'
+]}
 ];
 
-const weeksEl = document.getElementById('weeks');
-let total = 0;
-
-weeks.forEach((week, wi) => {
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML = `<h3>${week.title}</h3>`;
-
-  week.days.forEach((day, di) => {
-    total++;
-    const key = `${wi}-${di}`;
-    const checked = localStorage.getItem(key) === '1';
-
-    const row = document.createElement('label');
-    row.className = 'day';
-    row.innerHTML = `
-      <input type="checkbox" ${checked ? 'checked' : ''} onchange="saveCheck('${key}', this.checked)">
-      <span>${day}</span>
-    `;
-    card.appendChild(row);
-  });
-
-  weeksEl.appendChild(card);
+const weeksEl=document.getElementById('weeks');
+let total=0;
+weeks.forEach((week,wi)=>{
+ const card=document.createElement('div');
+ card.className='card';
+ card.innerHTML=`<h3>${week.title}</h3>`;
+ week.days.forEach((day,di)=>{
+  total++;
+  const key=`${wi}-${di}`;
+  const checked=localStorage.getItem(key)==='1';
+  const row=document.createElement('label');
+  row.className='day';
+  row.innerHTML=`<input type="checkbox" ${checked?'checked':''} onchange="saveCheck('${key}',this.checked)"><span>${day}</span>`;
+  card.appendChild(row);
+ });
+ weeksEl.appendChild(card);
 });
 
-function updateStats(done) {
-  const calories = done * 450;
-  document.getElementById('calories').textContent = calories;
-  document.getElementById('streak').textContent = done + ' days';
+function getLogs(){return JSON.parse(localStorage.getItem('workoutLogs')||'[]')}
+function setLogs(logs){localStorage.setItem('workoutLogs',JSON.stringify(logs))}
+
+function saveWorkoutLog(){
+ const calories=Number(document.getElementById('caloriesInput').value||0);
+ const weight=Number(document.getElementById('weightInput').value||0);
+ if(!calories||!weight)return;
+ const logs=getLogs();
+ logs.push({date:new Date().toLocaleDateString('bg-BG'),calories,weight});
+ setLogs(logs);
+ document.getElementById('caloriesInput').value='';
+ document.getElementById('weightInput').value='';
+ renderLogs();
 }
 
-function saveCheck(key, value) {
-  localStorage.setItem(key, value ? '1' : '0');
-  updateProgress();
+function saveCheck(key,val){localStorage.setItem(key,val?'1':'0');updateProgress()}
+
+function updateProgress(){
+ let done=0;
+ for(let i=0;i<localStorage.length;i++){
+  const k=localStorage.key(i);
+  if(k.includes('-')&&localStorage.getItem(k)==='1')done++;
+ }
+ const pct=Math.round((done/total)*100)||0;
+ document.getElementById('progressText').textContent=pct+'%';
+ document.getElementById('progressBar').style.width=pct+'%';
 }
 
-function updateProgress() {
-  let done = 0;
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k.includes('-') && localStorage.getItem(k) === '1') done++;
-  }
-
-  const pct = Math.round((done / total) * 100) || 0;
-
-  document.getElementById('progressText').textContent = pct + '%';
-  document.getElementById('progressBar').style.width = pct + '%';
-
-  updateStats(done);
+function renderLogs(){
+ const logs=getLogs();
+ const totalCalories=logs.reduce((a,l)=>a+l.calories,0);
+ const latest=logs[logs.length-1];
+ document.getElementById('totalCalories').textContent=totalCalories;
+ document.getElementById('latestWeight').textContent=latest?latest.weight+' кг':'-';
+ 
+ const history=document.getElementById('history');
+ history.innerHTML=logs.map(l=>`<div class="log-item">📅 ${l.date} • 🔥 ${l.calories} kcal • ⚖️ ${l.weight} кг</div>`).reverse().join('');
+ 
+ const first=logs[0];
+ const last=logs[logs.length-1];
+ const diff=first&&last?(last.weight-first.weight).toFixed(1):0;
+ document.getElementById('summary').innerHTML=`
+  <div class="log-item">Общо тренировки: ${logs.length}</div>
+  <div class="log-item">Общо изгорени калории: ${totalCalories}</div>
+  <div class="log-item">Промяна в теглото: ${diff} кг</div>
+ `;
 }
-
-const weightInput = document.getElementById('weight');
-weightInput.value = localStorage.getItem('weight') || '';
-weightInput.addEventListener('input', e => {
-  localStorage.setItem('weight', e.target.value);
-});
 
 updateProgress();
+renderLogs();
 </script>
-
 </body>
 </html>
