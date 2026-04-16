@@ -85,6 +85,37 @@ button{
   border-radius:10px;
   margin-top:6px;
 }
+.auth-buttons{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.btn{
+  flex:1;
+  padding:14px 0;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.login-btn{
+  background:#22c55e;
+}
+
+.register-btn{
+  background:#f97316;
+}
+
+/* 👇 hover ефект */
+.btn:hover{
+  opacity:0.9;
+}
+
 </style>
 </head>
 
@@ -96,14 +127,14 @@ button{
   <input id="email" type="email" placeholder="Имейл">
   <input id="password" type="password" placeholder="Парола">
 
-  <div style="display:flex; gap:10px;">
-    <button onclick="login()" style="flex:1; background:#22c55e;">
-      Вход
-    </button>
-    <button onclick="signUp()" style="flex:1;">
-      Регистрация
-    </button>
-  </div>
+  <div class="auth-buttons">
+  <button onclick="login()" class="btn login-btn">
+    Вход
+  </button>
+  <button onclick="signUp()" class="btn register-btn">
+    Регистрация
+  </button>
+</div>
 </div>
 
 <div id="app" style="display:none">
