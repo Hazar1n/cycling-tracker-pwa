@@ -118,9 +118,6 @@ button{
   font-weight:bold;
 }
 
-button, input, label{
-  touch-action: manipulation;
-}
 
 .log-item{
   background:#1f2937;
@@ -132,6 +129,10 @@ button, input, label{
   display:flex;
   gap:10px;
   margin-top:10px;
+}
+
+button, input, label{
+  touch-action: manipulation;
 }
 
 .btn{
@@ -286,11 +287,10 @@ let endX = 0;
 
 const app = document.getElementById('app');
 
-app.addEventListener('touchstart', (e) => {
+pp.addEventListener('touchstart', (e) => {
 
   const tag = e.target.tagName.toLowerCase();
 
-  // ❌ ако е input или button → не прави swipe
   if(tag === 'input' || tag === 'button' || tag === 'label'){
     return;
   }
