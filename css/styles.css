@@ -13,7 +13,7 @@ body::before{
   content:'';position:fixed;inset:0;
   background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(249,115,22,0.12) 0%,transparent 60%),
     radial-gradient(ellipse 60% 40% at 80% 80%,rgba(59,130,246,0.06) 0%,transparent 50%),
-    url('images/cycle.jpg') center/cover no-repeat;
+    url('../images/cycle.jpg') center/cover no-repeat;
   z-index:-2;pointer-events:none;
 }
 body::after{
@@ -79,7 +79,7 @@ body::after{
 /* ── UNIFIED TODAY CARD ── */
 .today-top-row{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px;}
 
-/* Dual ring — larger so labels are readable */
+/* Dual ring */
 .dual-ring{position:relative;width:120px;height:120px;flex-shrink:0;}
 .dual-ring svg{transform:rotate(-90deg);}
 .dr-track{fill:none;stroke:rgba(255,255,255,0.05);}
@@ -100,13 +100,8 @@ body::after{
   font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;
   line-height:1.1;
 }
-.dr-labels{
-  display:flex;gap:4px;margin-top:2px;
-}
-.dr-lbl{
-  font-size:8px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;
-  padding:1px 5px;border-radius:4px;
-}
+.dr-labels{display:flex;gap:4px;margin-top:2px;}
+.dr-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;padding:1px 5px;border-radius:4px;}
 .dr-lbl-plan{background:rgba(249,115,22,0.2);color:var(--orange);}
 .dr-lbl-weight{border-radius:4px;padding:1px 5px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;}
 
@@ -309,4 +304,3 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
   transition:background-color 9999s ease-in-out 0s;
 }
 button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
-
