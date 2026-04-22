@@ -69,7 +69,7 @@ function switchTab(tab, el) {
   document.getElementById('screen-' + tab).classList.add('active');
   if (el) el.classList.add('active');
   if (tab === 'week')  renderWeeks();
-  if (tab === 'stats') { renderChart(allLogs); renderWeightGoalStats(); }
+  if (tab === 'stats') { renderChart(allLogs); renderWeightGoalStats(); renderWeeklyKmChart(); }
   if (tab === 'log')   renderLogs();
   if (tab === 'plans') renderPlansScreen();
 }
