@@ -1,765 +1,168 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cycling Tracker Pro</title>
-
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#f97316">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-*{
-  box-sizing: border-box;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-
-body{
-  margin:0;
-  font-family:'Inter',sans-serif;
-  color:#fff;
-  max-width:430px;
-  margin:auto;
-  padding:16px;
-
-  background:
-  linear-gradient(rgba(15,23,42,0.5), rgba(15,23,42,0.6)),
-  url('images/cycle.jpg');
-
-  background-size: cover;
-  background-position: center;
-  min-height: 100vh;
-}
-
-
-html, body{
-  height:100%;
-}
-
-body{
-  min-height:100dvh; /* 🔥 iOS fix */
-}
-
-#app{
-  touch-action: pan-y;
-}
-
-.card{
-  background: rgba(17,24,39,0.7);
-  backdrop-filter: blur(10px);
-  padding:20px;
-  border-radius:20px;
-  margin-bottom:14px;
-  overflow:hidden; /* 🔥 важно */
-}
-
-#auth{
-  margin-top:80px;
-}
-
-#weeks{
-  display: none;
-  transition: transform 0.2s ease;
-}
-
-.day{
-  display:flex;
-  gap:10px;
-  background:#1f2937;
-  padding:12px;
-  border-radius:12px;
-  margin:6px 0;
-}
-
-.bar{
-  height:10px;
-  background:#334155;
-  border-radius:999px;
-}
-
-.fill{
-  height:100%;
-  background:#f97316;
-}
-
-input{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border:none;
-  border-radius:14px;
-  background:#1f2937;
-  color:#fff;
-  font-size:16px;
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-.day input[type="checkbox"]{
-  width:18px;
-  height:18px;
-  flex:none;
-  pointer-events: auto;
-}
-
-button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border:none;
-  border-radius:10px;
-  background:#f97316;
-  color:#fff;
-  font-weight:bold;
-}
-
-
-.log-item{
-  background:#1f2937;
-  padding:10px;
-  border-radius:10px;
-  margin-top:6px;
-}
-.auth-buttons{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
-
-button, input, label{
-  touch-action: manipulation;
-}
-
-.btn{
-  flex:1;
-  padding:16px 0;
-  border:none;
-  border-radius:14px;
-  font-size:16px;
-  font-weight:700;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition:0.2s;
-}
-
-.login-btn{
-  background:#22c55e;
-}
-
-.register-btn{
-  background:#f97316;
-}
-
-.btn:active{
-  transform:scale(0.96);
-}
-
-/* 👇 hover ефект */
-.btn:hover{
-  opacity:0.9;
-}
-
-.auth-buttons{
-  display:flex;
-  gap:12px;
-  margin-top:14px;
-}
-
-</style>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Cycling Tracker Pro</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#f97316">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="card" id="auth">
-  <h2 style="margin-bottom:10px;">🔐 Вход в акаунт</h2>
-
-  <input id="email" type="email" placeholder="Имейл">
-  <input id="password" type="password" placeholder="Парола">
-
-  <div class="auth-buttons">
-  <button onclick="login()" class="btn login-btn">
-    Вход
-  </button>
-  <button onclick="signUp()" class="btn register-btn">
-    Регистрация
-  </button>
-</div>
-</div>
-
-<div id="app" style="display:none">
-
-  <!-- HEADER -->
-  <div class="card">
-    <h2>🚴 Cycling Tracker</h2>
-
-    <button onclick="logout()" style="background:#ef4444;">
-      🚪 Изход
-    </button>
-
-    <div>Прогрес: <span id="progressText">0%</span></div>
-    <div class="bar">
-      <div id="progressBar" class="fill"></div>
+<div id="auth">
+    <div class="auth-logo">
+        <span class="icon">🚴</span>
+        <h1>Cycling<span>Pro</span></h1>
+        <p>Твоят персонален трекер</p>
     </div>
-
-    <div style="margin-top:10px;">
-      🔥 Калории: <span id="totalCalories">0</span><br>
-      ⚖️ Тегло: <span id="latestWeight">-</span>
+    <div class="auth-card">
+        <div class="field-group">
+            <div class="field"><span class="fi">✉️</span><input id="email" type="email" placeholder="Имейл адрес" autocomplete="email"></div>
+            <div class="field"><span class="fi">🔒</span><input id="password" type="password" placeholder="Парола" autocomplete="current-password"></div>
+        </div>
+        <div class="auth-btns">
+            <button class="btn btn-green" onclick="login()">Вход</button>
+            <button class="btn btn-orange" onclick="signUp()">Регистрация</button>
+        </div>
     </div>
-  </div>
-
-  <div class="card" id="todayCard">
-  <h3>📅 Днес</h3>
-  <div id="todayContent"></div>
 </div>
 
-<button onclick="toggleWeek()" style="background:#3b82f6;">
-  📄 Седмица
-</button>
+<div id="app">
+    <div class="app-header">
+        <div class="app-title">🚴 Cycling<span>Pro</span></div>
+        <button class="logout-btn" onclick="logout()">Изход</button>
+    </div>
 
-  <!-- 🚴 СЕДМИЦИ (ТОВА ЛИПСВАШЕ!) -->
-  <div id="weeks"></div>
+    <div class="screen active" id="screen-today">
+        <div class="card" id="unifiedTodayCard">
+            <div id="unifiedTodayContent"></div>
+        </div>
 
-  <!-- ➕ ДОБАВЯНЕ -->
-  <div class="card">
-    <h3>Добави тренировка</h3>
-    <input id="caloriesInput" type="number" placeholder="Калории">
-    <input id="weightInput" type="number" placeholder="Тегло">
-    <button onclick="saveWorkoutLog()">Запази</button>
-  </div>
+        <div class="card">
+            <div class="card-title"><span class="ct-icon">⏱️</span>Таймер</div>
+            <div class="timer-wrap">
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <div class="timer-btns">
+                    <button class="btn btn-green" id="timerStartBtn" onclick="timerToggle()">▶ Старт</button>
+                    <button class="btn btn-ghost" onclick="timerReset()">⏹ Нулиране</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <!-- 📊 ПРОГРЕС -->
-  <div class="card">
-    <h3>📊 Прогрес</h3>
-    <div id="summary"></div>
-  </div>
+    <div class="screen" id="screen-week">
+        <div class="card">
+            <div class="week-nav">
+                <button class="week-nav-btn" onclick="changeWeek(-1)">‹</button>
+                <div class="week-nav-title" id="weekNavTitle">Седмица 1</div>
+                <button class="week-nav-btn" onclick="changeWeek(1)">›</button>
+            </div>
+            <div class="week-dots" id="weekDots"></div>
+            <div id="weekDays"></div>
+        </div>
+    </div>
 
-  <!-- 📚 ИСТОРИЯ -->
-  <div class="card">
-    <h3>📚 История</h3>
-    <div id="history"></div>
-  </div>
+    <div class="screen" id="screen-log">
+        <div class="card">
+            <div class="card-title"><span class="ct-icon">➕</span>Добави тренировка</div>
+            <div class="log-form">
+                <div class="log-field"><span class="lf-icon">🔥</span><input class="log-input" id="caloriesInput" type="number" placeholder="Калории"></div>
+                <div class="log-field"><span class="lf-icon">⚖️</span><input class="log-input" id="weightInput" type="number" placeholder="Тегло кг" step="0.1"></div>
+                <div class="log-field km-field"><span class="lf-icon">🛣️</span><input class="log-input" id="kmInput" type="number" placeholder="Изминати км" step="0.1"></div>
+            </div>
+            <textarea class="notes-input" id="notesInput" placeholder="📝 Бележки (по желание)..."></textarea>
+            <button class="btn btn-orange" style="width:100%" onclick="saveWorkoutLog()">Запази тренировка</button>
+        </div>
+        <div class="card">
+            <div class="card-title"><span class="ct-icon">📊</span>Седмично сравнение</div>
+            <div class="weekly-compare">
+                <div class="wc-card"><div class="wc-title">Тази седмица kcal</div><div class="wc-val" id="wcThisKcal">—</div><div class="wc-delta" id="wcKcalDelta"></div></div>
+                <div class="wc-card"><div class="wc-title">Миналата kcal</div><div class="wc-val" id="wcLastKcal">—</div></div>
+                <div class="wc-card"><div class="wc-title">Тази седмица км</div><div class="wc-val" id="wcThisKm">—</div><div class="wc-delta" id="wcKmDelta"></div></div>
+                <div class="wc-card"><div class="wc-title">Миналата км</div><div class="wc-val" id="wcLastKm">—</div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title"><span class="ct-icon">📚</span>История</div>
+            <div id="history"></div>
+        </div>
+    </div>
 
-  <!-- 📈 ГРАФИКА -->
-  <div class="card">
-    <h3>📈 Графика на теглото</h3>
-    <canvas id="weightChart"></canvas>
-  </div>
+    <div class="screen" id="screen-stats">
+        <div class="card">
+            <div class="card-title"><span class="ct-icon">📈</span>Графики</div>
+            <div class="chart-tabs">
+                <div class="chart-tab active" onclick="switchChart('weight',this)">Тегло</div>
+                <div class="chart-tab" onclick="switchChart('calories',this)">Калории</div>
+                <div class="chart-tab" onclick="switchChart('km',this)">Км</div>
+            </div>
+            <canvas id="mainChart" height="200"></canvas>
+        </div>
+        <div class="card" id="weightGoalStatsCard" style="display:none;">
+            <div class="card-title"><span class="ct-icon">⚖️</span>Анализ на теглото</div>
+            <div id="weightGoalStats"></div>
+        </div>
+    </div>
 
-<button onclick="resetProgress()" style="background:#ef4444;">
-  🔄 Reset план
-</button>
+    <div class="screen" id="screen-plans">
+        <div class="card" id="activePlanCard">
+            <div class="card-title"><span class="ct-icon">🎯</span>Активен план</div>
+            <div id="activePlanInfo"><div class="empty-state"><div class="es-icon">📋</div><p>Няма активен план</p></div></div>
+        </div>
+        <div class="card">
+            <div class="card-title"><span class="ct-icon">🛠️</span>Нов план</div>
+            <input class="plan-name-input" id="planNameInput" type="text" placeholder="Име на плана...">
+            <div class="weeks-builder" id="weeksBuilder"></div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-ghost btn-sm" onclick="addWeekToBuilder()">+ Седмица</button>
+                <button class="btn btn-orange" style="flex:1" onclick="savePlan()">💾 Запази план</button>
+            </div>
+        </div>
+    </div>
 
-
+    <div class="tab-bar">
+        <button class="tab active" onclick="switchTab('today',this)"><span class="tab-icon">🏠</span>Днес</button>
+        <button class="tab" onclick="switchTab('week',this)"><span class="tab-icon">📅</span>Седмица</button>
+        <button class="tab" onclick="switchTab('log',this)"><span class="tab-icon">➕</span>Добави</button>
+        <button class="tab" onclick="switchTab('stats',this)"><span class="tab-icon">📈</span>Статистика</button>
+        <button class="tab" onclick="switchTab('plans',this)"><span class="tab-icon">🗂️</span>Планове</button>
+    </div>
 </div>
 
-
-<script>
-
-
-const startDate = new Date(2026, 3, 15); // 15 април (месеците са 0-index!)
-
-const weeks = [
-  {
-    title: 'Седмица 1',
-    days: [
-      'Сряда • Почивка • раздвижване + стречинг 10–15 мин',
-      'Четвъртък • 30 км • Zone 2 • 150–160 W • равномерно темпо за изгаряне на мазнини',
-      'Петък • 25 км • Загрявка 7 км @ 140–150 W • 4x3 мин @ 190–200 W • 3 мин леко @ 100–120 W между всяка серия • разпускане леко до общите км (25 км)',
-      'Събота • 15 км • Възстановително каране • 110–130 W • много леко въртене',
-      'Неделя • 25 км • Tempo • 170–180 W • стабилно темпо',
-      'Понеделник • 40 км • Дълго каране • Zone 2 • 150–160 W • издръжливост и fat burn',
-      'Вторник • Почивка • разходка 20–30 мин'
-    ]
-  },
-  {
-    title: 'Седмица 2',
-    days: [
-      'Сряда • Почивка • раздвижване + стречинг',
-      'Четвъртък • 35 км • Zone 2 • 150–160 W • steady каране',
-      'Петък • 30 км • Загрявка 8 км @ 140–150 W • 5x3 мин @ 195–205 W • 3 мин леко @ 100–120 W • разпускане до 30 км',
-      'Събота • 15 км • Възстановително каране • около 120 W',
-      'Неделя • 30 км • Tempo • 170–180 W',
-      'Понеделник • 45 км • Дълго каране • Zone 2 • 150–160 W',
-      'Вторник • Почивка • леко ходене'
-    ]
-  },
-  {
-    title: 'Седмица 3',
-    days: [
-      'Сряда • Почивка • раздвижване + стречинг',
-      'Четвъртък • 35 км • Zone 2 • 155–160 W',
-      'Петък • 30 км • Загрявка 8 км • 4x4 мин @ 195–205 W • 4 мин леко @ 100–120 W • разпускане до общите км',
-      'Събота • 20 км • Възстановително каране • 110–125 W',
-      'Неделя • 30 км • Tempo • 175–185 W',
-      'Понеделник • 50 км • Дълго каране • Zone 2 • 150–160 W',
-      'Вторник • Почивка • walk + стречинг'
-    ]
-  },
-  {
-    title: 'Седмица 4 (разтоварваща)',
-    days: [
-      'Сряда • Почивка • възстановяване',
-      'Четвъртък • 25 км • Easy Zone 2 • 150–155 W',
-      'Петък • 20 км • Загрявка 5 км • 3x3 мин @ 190 W • 3 мин леко @ 100–120 W • разпускане до общите км',
-      'Събота • Почивка • раздвижване + стречинг',
-      'Неделя • 20 км • Easy • 120–130 W',
-      'Понеделник • 35 км • Леко дълго каране • около 150 W',
-      'Вторник • Пълна почивка'
-    ]
-  }
-];
-
-let currentWeek = Number(localStorage.getItem('currentWeek') || 0);
-
-function getProgramDay(){
-  const today = new Date();
-
-  const diffTime = today - startDate;
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-  return diffDays;
-}
-
-function getWeekAndDay(){
-  const dayNumber = getProgramDay();
-
-  const weekIndex = Math.floor(dayNumber / 7);
-  const dayIndex = dayNumber % 7;
-
-  return { weekIndex, dayIndex };
-}
-
-function renderToday(){
-  const todayEl = document.getElementById('todayContent');
-
-  const { weekIndex, dayIndex } = getWeekAndDay();
-
-  const dayNumber = getProgramDay() + 1;
-
-  // 🔥 sync currentWeek
-  const safeWeek = Math.min(weekIndex, weeks.length - 1);
-  const week = weeks[safeWeek];
-
-  const day = week.days[dayIndex];
-
-  const key = `${currentWeek}-${dayIndex}`;
-  const checked = localStorage.getItem(key) === '1';
-
-  todayEl.innerHTML = `
-  <div class="day" style="flex-direction:column; gap:6px;">
-    
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <strong>📅 Ден ${dayNumber}</strong>
-
-      <input type="checkbox" ${checked ? 'checked' : ''}
-      onchange="saveCheck('${key}', this.checked)">
+<div class="modal-overlay" id="goalModal">
+    <div class="modal">
+        <div class="modal-title">🎯 Целево тегло</div>
+        <div class="wg-setup">
+            <div class="wg-inputs">
+                <div>
+                    <div class="wg-label">Начално тегло (кг)</div>
+                    <input class="wg-input" id="wgStart" type="number" step="0.1" placeholder="напр. 85">
+                </div>
+                <div>
+                    <div class="wg-label">Целево тегло (кг)</div>
+                    <input class="wg-input" id="wgTarget" type="number" step="0.1" placeholder="напр. 75">
+                </div>
+            </div>
+            <div>
+                <div class="wg-label">Крайна дата</div>
+                <input class="wg-input" id="wgDate" type="date" style="width:100%;">
+            </div>
+        </div>
+        <div class="modal-btns">
+            <button class="btn btn-orange" onclick="saveWeightGoal()">💾 Запази</button>
+            <button class="btn btn-ghost" onclick="closeGoalModal()">Отказ</button>
+        </div>
     </div>
+</div>
 
-    <span>${day}</span>
-
-  </div>
-`;
-}
-
-function renderWeeks(){
-  const weeksEl = document.getElementById('weeks');
-  if(!weeksEl) return;
-
-  weeksEl.innerHTML = '';
-
-  const week = weeks[currentWeek];
-
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML = `<h3>${week.title}</h3>`;
-
-  week.days.forEach((day, di) => {
-    const key = `${currentWeek}-${di}`;
-    const checked = localStorage.getItem(key) === '1';
-
-    const row = document.createElement('label');
-    row.className = 'day';
-
-    row.innerHTML = `
-      <input type="checkbox" ${checked ? 'checked' : ''} 
-      onchange="saveCheck('${key}', this.checked)">
-      <span>${day}</span>
-    `;
-
-    card.appendChild(row);
-  });
-
-  weeksEl.appendChild(card);
-
-  checkWeekCompletion();
-}
-
-let startX = 0;
-let endX = 0;
-
-const app = document.getElementById('app');
-
-app.addEventListener('touchstart', (e) => {
-
-  const tag = e.target.tagName.toLowerCase();
-
-  if(tag === 'input' || tag === 'button' || tag === 'label'){
-    return;
-  }
-
-  startX = e.touches[0].clientX;
-
-}, { passive: true });
-
-app.addEventListener('touchend', (e) => {
-
-  const tag = e.target.tagName.toLowerCase();
-
-  if(tag === 'input' || tag === 'button' || tag === 'label'){
-    return;
-  }
-
-  endX = e.changedTouches[0].clientX;
-  handleSwipe();
-
-}, { passive: true });
-  handleSwipe();
-  renderToday();
-
-
-function handleSwipe(){
-  const diff = startX - endX;
-
-  if(diff > 50){
-    if(currentWeek < weeks.length - 1){
-      currentWeek++;
-      localStorage.setItem('currentWeek', currentWeek);
-      renderWeeks();
-      renderToday();
-    }
-  }
-
-  if(diff < -50){
-    if(currentWeek > 0){
-      currentWeek--;
-      localStorage.setItem('currentWeek', currentWeek);
-      renderWeeks();
-      renderToday();
-    }
-  }
-} // 🔥 ТОВА ЛИПСВАШЕ
-let showWeek = false;
-
-function toggleWeek(){
-  showWeek = !showWeek;
-
-  const el = document.getElementById('weeks');
-
-  el.style.display = showWeek ? 'block' : 'none';
-
-  if(showWeek){
-    renderWeeks(); // 🔥 важно
-  }
-}
-
-
-
-function animateSwipe(direction){
-  const el = document.getElementById('weeks');
-
-  el.style.transform = `translateX(${direction}px)`;
-
-  setTimeout(() => {
-    el.style.transform = 'translateX(0)';
-  }, 200);
-}
-
-function resetProgress(){
-  localStorage.clear();
-  currentWeek = 0;
-  renderWeeks();
-  updateProgress();
-}
-
-
-// 🔐 SIGN UP
-async function signUp(){
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-
-  const { data, error } = await supabaseClient.auth.signUp({
-    email,
-    password
-  });
-
-  if(error){
-    alert(error.message);
-  } else {
-    alert("Регистриран ✅");
-  }
-}
-
-// 🔑 LOGIN
-async function login(){
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if(error){
-    alert(error.message);
-  } else {
-    alert("Влязъл си ✅");
-    checkUser(); // 🔥 важно
-  }
-}
-
-// 👤 CHECK USER
-async function checkUser(){
-  const { data } = await supabaseClient.auth.getUser();
-  const user = data.user;
-
-  if(user){
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('auth').style.display = 'none';
-
-  renderToday();   // 🔥 ново
-  renderWeeks();
-  renderLogs();
-
-  } else {
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('auth').style.display = 'block';
-  }
-}
-
-// 🚪 LOGOUT
-async function logout(){
-  await supabaseClient.auth.signOut();
-
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('auth').style.display = 'block';
-
-  alert("Излезе успешно");
-}
-
-// 🔥 SUPABASE
-const supabaseClient = window.supabase.createClient(
-'https://kudsnoxcgisxzzltlfwr.supabase.co',
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1ZHNub3hjZ2lzeHp6bHRsZndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjIyNDIsImV4cCI6MjA5MTkzODI0Mn0.4hUFvZJAnObCQRVHijsoMWdpXbnZt0oiKC2bZ_n9Idw'
-);
-console.log("SUPABASE:", supabaseClient);
-
-// 🚴 ПОДРОБЕН ПЛАН
-
-
-// 📅 RENDER WEEKS
-const weeksEl = document.getElementById('weeks');
-
-
-
-function checkWeekCompletion(){
-  const week = weeks[currentWeek];
-
-  let allDone = true;
-
-  week.days.forEach((day, di) => {
-    const key = `${currentWeek}-${di}`;
-    if(localStorage.getItem(key) !== '1'){
-      allDone = false;
-    }
-  });
-
-  if(allDone){
-    if(currentWeek < weeks.length - 1){
-      currentWeek++;
-      localStorage.setItem('currentWeek', currentWeek);
-
-      alert("🎉 Минаваш към следващата седмица!");
-
-      renderWeeks();
-    } else {
-      alert("🏆 Завърши целия план!");
-    }
-  }
-}
-
-
-// 💾 SAVE
-async function saveWorkoutLog(){
-  const calories = Number(document.getElementById('caloriesInput').value);
-  const weight = Number(document.getElementById('weightInput').value);
-
-  const { data: userData } = await supabaseClient.auth.getUser();
-
-  const user = userData.user;
-
-  if(!user){
-    alert("Трябва да си логнат!");
-    return;
-  }
-
-  await supabaseClient.from('workouts').insert([
-    {
-      date: new Date().toLocaleDateString('bg-BG'),
-      calories,
-      weight,
-      user_id: user.id
-    }
-  ]);
-
-  renderLogs();
-}
-
-// 📊 RENDER LOGS
-async function renderLogs() {
-  const logs = await loadFromSupabase();
-
-  const caloriesEl = document.getElementById('totalCalories');
-  const weightEl = document.getElementById('latestWeight');
-  const historyEl = document.getElementById('history');
-  const summaryEl = document.getElementById('summary');
-
-  if(logs.length === 0) return;
-
-  // 👉 ТУК е правилното място
-  renderChart(logs);
-
-  const totalCalories = logs.reduce((sum, l) => sum + Number(l.calories || 0), 0);
-
-  const firstWeight = Number(logs[0].weight);
-  const lastWeight = Number(logs[logs.length - 1].weight);
-
-  caloriesEl.textContent = totalCalories;
-  weightEl.textContent = lastWeight + " кг";
-
-  historyEl.innerHTML = logs.map(l => `
-    <div class="log-item">
-      📅 ${l.date} • 🔥 ${l.calories} kcal • ⚖️ ${l.weight} кг
-    </div>
-  `).reverse().join('');
-
-  summaryEl.innerHTML = `
-    <div class="log-item">🔥 Общо калории: ${totalCalories}</div>
-    <div class="log-item">⚖️ Разлика: ${(lastWeight-firstWeight).toFixed(1)} кг</div>
-  `;
-}
-
-async function loadFromSupabase() {
-
-  const { data: userData } = await supabaseClient.auth.getUser();
-  const user = userData.user;
-
-  if(!user) return [];
-
-  const { data, error } = await supabaseClient
-    .from('workouts')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('id', { ascending: true });
-
-  if(error){
-    console.log(error);
-    return [];
-  }
-
-  return data;
-}
-
-// 📊 ГРАФИКА
-let chart;
-
-function renderChart(logs){
-  const ctx = document.getElementById('weightChart');
-
-  const labels = logs.map(l => l.date);
-  const weights = logs.map(l => Number(l.weight));
-
-  if(chart){
-    chart.destroy();
-  }
-
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Тегло (кг)',
-        data: weights,
-        borderColor: '#f97316',
-        backgroundColor: 'rgba(249,115,22,0.2)',
-        tension: 0.3,
-        fill: true
-      }]
-    },
-    options: {
-      plugins: {
-        legend: {
-          labels: { color: '#fff' }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#ccc' }
-        },
-        y: {
-          ticks: { color: '#ccc' }
-        }
-      }
-    }
-  });
-}
-
-
-// 📈 PROGRESS
-function updateProgress(){
-
-  let total = 0;
-  let done = 0;
-
-  weeks.forEach((week, wi) => {
-    week.days.forEach((day, di) => {
-      total++;
-
-      const key = `${wi}-${di}`;
-      if(localStorage.getItem(key) === '1'){
-        done++;
-      }
-    });
-  });
-
-  const pct = total ? Math.round((done / total) * 100) : 0;
-
-  document.getElementById('progressText').textContent = pct + '%';
-  document.getElementById('progressBar').style.width = pct + '%';
-}
-
-function saveCheck(key,val){
-  localStorage.setItem(key, val ? '1' : '0');
-
-  updateProgress();
-  checkWeekCompletion();
-  renderWeeks();
-  renderToday(); // 🔥 sync
-}
-
-checkUser();
-updateProgress();
-renderLogs();
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  checkUser();
-});
-
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
